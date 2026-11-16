@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LungCare AI — Lung Cancer Risk Prediction</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-brand">LungCare <span class="accent">AI</span></div>
+  <div class="nav-links">
+    <a href="/" class="active">Home</a>
+    <a href="/assessment">Health Check</a>
+    <a href="#features">Features</a>
+    <a href="#how">How It Works</a>
+  </div>
+  <a href="/assessment" class="btn-nav">Start Check →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-badge">🫁 AI-Powered Lung Cancer Screening</div>
+    <h1>Understand Your<br>Lung Health.<br><span class="accent">Make Better<br>Decisions.</span></h1>
+    <p class="hero-sub">LungCare AI brings advanced lung cancer risk assessment using machine learning. Analyze your health parameters, identify early warning signs, and receive personalized clinical recommendations.</p>
+    <div class="hero-cta">
+      <a href="/assessment" class="btn-dark">Start Health Check →</a>
+      <a href="#how" class="btn-link">How It Works ↓</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="ai-float">
+      <div class="ai-icon">🤖</div>
+      <div>
+        <span class="ai-lbl">AI Analysis</span>
+        <span class="ai-sub">Ready to analyze</span>
+      </div>
+      <span style="color:#10b981;font-size:.8rem;font-weight:700">✓</span>
+    </div>
+    <div class="health-card">
+      <div class="card-hdr">
+        <span class="card-lbl">Health Overview</span>
+        <span class="status-ready">Ready</span>
+      </div>
+      <div class="card-title">Your Lung Assessment</div>
+      <div class="gauge-wrap">
+        <div class="gauge-svg-sm">
+          <svg viewBox="0 0 100 100">
+            <circle class="gauge-track-sm" cx="50" cy="50" r="40"/>
+            <circle class="gauge-fill-sm" cx="50" cy="50" r="40"/>
+          </svg>
+        </div>
+        <div class="gauge-info">
+          <div class="g-label">Overall Status</div>
+          <div class="g-status">Ready</div>
+          <div class="g-desc">Start your assessment<br>to get your score</div>
+        </div>
+      </div>
+      <div class="card-stats">
+        <div class="stat-box pink">
+          <div class="sbl">🫁 Risk Level</div>
+          <div class="sbv">—</div>
+        </div>
+        <div class="stat-box blue">
+          <div class="sbl">📊 Score</div>
+          <div class="sbv">—/100</div>
+        </div>
+        <div class="stat-box teal">
+          <div class="sbl">⚠️ Warnings</div>
+          <div class="sbv">—</div>
+        </div>
+        <div class="stat-box amber">
+          <div class="sbl">🔎 Features</div>
+          <div class="sbv">23</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-item"><div class="stat-num">23<span>+</span></div><div class="stat-txt">Health Parameters Analyzed</div></div>
+  <div class="stat-item"><div class="stat-num">3</div><div class="stat-txt">Risk Levels (Low / Medium / High)</div></div>
+  <div class="stat-item"><div class="stat-num">5</div><div class="stat-txt">ML Models in Ensemble</div></div>
+  <div class="stat-item"><div class="stat-num">95<span>%</span></div><div class="stat-txt">Ensemble Model Accuracy</div></div>
+</div>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="sec-tag">What LungCare AI Offers</div>
+  <div class="sec-title">Everything You Need<br>for Lung Health Screening</div>
+  <p class="sec-sub">From risk assessment to personalized clinical recommendations — all in one AI-powered platform.</p>
+  <div class="features-grid">
+    <div class="feat-card">
+      <div class="feat-icon">🧠</div>
+      <div class="feat-title">AI Risk Prediction</div>
+      <div class="feat-desc">Ensemble of 5 ML models (Random Forest, XGBoost, LightGBM, SVM, Logistic Regression) trained on 1,000+ patient records.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🚨</div>
+      <div class="feat-title">Early Warning System</div>
+      <div class="feat-desc">Automatically detects critical warning signs like hemoptysis, significant weight loss, and digital clubbing from your inputs.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🔎</div>
+      <div class="feat-title">Pattern Recognition</div>
+      <div class="feat-desc">Identifies dangerous feature combinations — synergistic risks like Smoking + Air Pollution that exponentially raise risk.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🥗</div>
+      <div class="feat-title">Lifestyle Recommendations</div>
+      <div class="feat-desc">Personalized food intake, exercise protocols, and lifestyle modifications tailored to your specific risk level.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">👨‍⚕️</div>
+      <div class="feat-title">Clinical Advisory</div>
+      <div class="feat-desc">Evidence-based clinical guidance: which scans to request, which specialists to see, and what tests to ask for.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">📄</div>
+      <div class="feat-title">Downloadable PDF Report</div>
+      <div class="feat-desc">Generate a comprehensive PDF health report with your risk score, all recommendations, and warning signs to share with your doctor.</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section how-bg" id="how">
+  <div class="sec-tag">Simple 4-Step Process</div>
+  <div class="sec-title">How It Works</div>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <div class="step-title">Fill the Assessment</div>
+      <div class="step-desc">Answer 23 health-related questions about lifestyle, environmental exposure, and symptoms using simple sliders.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <div class="step-title">AI Analysis</div>
+      <div class="step-desc">Our 5-model ensemble instantly processes your inputs and calculates your personalized lung cancer risk score.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <div class="step-title">Review Results</div>
+      <div class="step-desc">Get your risk level, early warnings, and pattern analysis presented in a clear, actionable dashboard.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">4</div>
+      <div class="step-title">Take Action</div>
+      <div class="step-desc">Follow personalized recommendations for diet, exercise, and clinical care — download your PDF report for your doctor.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="cta-banner">
+  <h2>Ready to Check Your Lung Health?</h2>
+  <p>It takes less than 5 minutes. Get your personalized risk assessment and clinical recommendations today.</p>
+  <a href="/assessment" class="btn-teal">Start Free Assessment →</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">LungCare <span>AI</span></div>
+  <div class="footer-note">⚠️ For informational purposes only. Not a substitute for professional medical advice.</div>
+  <div class="footer-right">© 2024 LungCare AI</div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

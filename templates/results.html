@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Your Results — LungCare AI</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-brand">LungCare <span class="accent">AI</span></div>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/assessment">New Assessment</a>
+  </div>
+  <button class="btn-nav" onclick="downloadReport()">⬇ Download Report</button>
+</nav>
+
+<div class="results-page">
+
+  <!-- RESULTS HERO -->
+  <div class="res-hero">
+    <div class="res-topbar">
+      <a href="/assessment" class="back-link">← New Assessment</a>
+      <button class="btn-dl" onclick="downloadReport()">📄 Download PDF Report</button>
+    </div>
+
+    <div class="res-overview">
+
+      <!-- Gauge -->
+      <div class="gauge-cont">
+        <div class="score-gauge">
+          <svg viewBox="0 0 140 140" width="150" height="150">
+            <circle class="gauge-track" cx="70" cy="70" r="60"/>
+            <circle class="gauge-fill" cx="70" cy="70" r="60" stroke-dasharray="377" stroke-dashoffset="377"/>
+          </svg>
+          <div class="score-center">
+            <div class="score-num" id="score-num">--</div>
+            <div class="score-out">/100</div>
+          </div>
+        </div>
+        <div class="risk-badge" id="risk-badge">● --</div>
+      </div>
+
+      <!-- Summary -->
+      <div class="ov-mid">
+        <h2 id="ov-title">Analyzing Your Results…</h2>
+        <p id="ov-summary">Please wait while we process your assessment data.</p>
+      </div>
+
+      <!-- Prob bars -->
+      <div class="prob-bars">
+        <div style="font-size:.8rem;font-weight:700;color:var(--dark);margin-bottom:4px">Risk Probability</div>
+        <div class="prob-row">
+          <span class="prob-name">Low</span>
+          <div class="prob-track"><div class="prob-fill" data-level="Low"></div></div>
+          <span class="prob-pct" data-level="Low">—</span>
+        </div>
+        <div class="prob-row">
+          <span class="prob-name">Medium</span>
+          <div class="prob-track"><div class="prob-fill" data-level="Medium"></div></div>
+          <span class="prob-pct" data-level="Medium">—</span>
+        </div>
+        <div class="prob-row">
+          <span class="prob-name">High</span>
+          <div class="prob-track"><div class="prob-fill" data-level="High"></div></div>
+          <span class="prob-pct" data-level="High">—</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RESULTS BODY -->
+  <div class="res-body">
+
+    <!-- LEFT COLUMN -->
+    <div class="res-left">
+
+      <!-- Early Warnings -->
+      <div class="res-card">
+        <div class="res-card-hdr">
+          <span class="res-card-ic">🚨</span>
+          <span class="res-card-title">Early Warning System</span>
+        </div>
+        <div class="res-card-body">
+          <div class="warn-list" id="warnList">
+            <div class="empty-warn">Loading…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pattern Recognition -->
+      <div class="res-card">
+        <div class="res-card-hdr">
+          <span class="res-card-ic">🔎</span>
+          <span class="res-card-title">Pattern Recognition</span>
+        </div>
+        <div class="res-card-body">
+          <div class="pat-list" id="patList">
+            <div class="empty-warn">Loading…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recommendations -->
+      <div class="res-card">
+        <div class="res-card-hdr">
+          <span class="res-card-ic">💡</span>
+          <span class="res-card-title">Personalized Recommendations</span>
+        </div>
+        <div class="res-card-body">
+          <!-- Tabs -->
+          <div class="rec-tabs">
+            <button class="rec-tab active" data-tab="clinical"  onclick="switchTab('clinical')">🏥 Clinical</button>
+            <button class="rec-tab"        data-tab="avoid"     onclick="switchTab('avoid')">🚫 Avoid</button>
+            <button class="rec-tab"        data-tab="exercise"  onclick="switchTab('exercise')">🏃 Exercise</button>
+            <button class="rec-tab"        data-tab="food"      onclick="switchTab('food')">🥗 Diet</button>
+            <button class="rec-tab"        data-tab="doctor"    onclick="switchTab('doctor')">👨‍⚕️ Doctor</button>
+          </div>
+
+          <div class="rec-panel active" data-panel="clinical"  id="rec-clinical"></div>
+          <div class="rec-panel"        data-panel="avoid"     id="rec-avoid"></div>
+          <div class="rec-panel"        data-panel="exercise"  id="rec-exercise"></div>
+          <div class="rec-panel"        data-panel="food"      id="rec-food"></div>
+          <div class="rec-panel"        data-panel="doctor">
+            <div class="doc-box" id="docBox"></div>
+            <div style="font-size:.8rem;font-weight:600;color:var(--dark);margin-bottom:8px">Next Steps:</div>
+            <div class="next-steps" id="nextSteps"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="res-right">
+
+      <!-- Patient Summary -->
+      <div class="res-card">
+        <div class="res-card-hdr">
+          <span class="res-card-ic">👤</span>
+          <span class="res-card-title">Patient Summary</span>
+        </div>
+        <div class="res-card-body">
+          <div class="pat-grid" id="patSummary"></div>
+          <div class="ts-row" id="ts-row"></div>
+        </div>
+      </div>
+
+      <!-- Download -->
+      <div class="res-card">
+        <div class="res-card-hdr">
+          <span class="res-card-ic">📄</span>
+          <span class="res-card-title">Report</span>
+        </div>
+        <div class="res-card-body">
+          <p style="font-size:.83rem;color:var(--muted);margin-bottom:16px;line-height:1.6">
+            Download a comprehensive PDF report with your complete risk assessment, clinical recommendations, and all warnings to share with your doctor.
+          </p>
+          <button class="btn-submit" style="width:100%;justify-content:center" onclick="downloadReport()">📄 Download PDF Report</button>
+          <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:12px">
+            ⚠️ This report is for informational purposes only.<br>Consult a licensed physician for medical advice.
+          </div>
+        </div>
+      </div>
+
+      <!-- Disclaimer -->
+      <div class="res-card" style="border-left:3px solid var(--warning)">
+        <div class="res-card-body">
+          <div style="font-size:.8rem;color:#92400e;line-height:1.65">
+            <strong>⚠️ Medical Disclaimer</strong><br>
+            LungCare AI is an educational screening tool. Results are based on a machine learning model and are not a clinical diagnosis. Always consult a qualified healthcare professional before making medical decisions.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
