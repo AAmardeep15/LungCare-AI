@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found — LungCare AI{% endblock %}
+
+{% block content %}
+<div class="section" style="text-align:center; padding:90px 24px;">
+  <div style="font-size:4rem; margin-bottom:12px;">🫁❓</div>
+  <h1 style="font-size:3rem; font-weight:900; color:var(--text); margin-bottom:8px;">404 — Page Not Found</h1>
+  <p style="color:var(--text-muted); font-size:1.05rem; max-width:500px; margin:0 auto 28px;">
+    The requested health screening or reporting resource does not exist or has been relocated.
+  </p>
+  <div style="display:flex; justify-content:center; gap:12px;">
+    <a href="{{ url_for('index') }}" class="btn-primary">Return to Home</a>
+    <a href="{{ url_for('assessment') }}" class="btn-outline">Take Health Check</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,93 +1,183 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Lung Cancer Risk Report — LungCare AI</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-<style>
-  body{background:#fff;padding:0;margin:0}
-  @media print{@page{margin:20mm} .no-print{display:none}}
-</style>
-</head>
-<body>
-<div class="report-page">
+{% extends "base.html" %}
 
-  <!-- HEADER -->
-  <div class="rpt-hdr">
-    <div class="rpt-logo">LungCare <span>AI</span><div style="font-size:.7rem;color:#6b7280;font-weight:400;margin-top:2px">Lung Cancer Risk Assessment Report</div></div>
-    <div class="rpt-meta">
-      <div id="rpt-ts">Date: —</div>
-      <div>AI-Powered Clinical Screening</div>
-      <div style="color:var(--danger);font-weight:600;margin-top:4px">CONFIDENTIAL — Patient Copy</div>
+{% block title %}Medical Assessment Report — LungCare AI{% endblock %}
+
+{% block content %}
+<div class="results-page" style="max-width:960px;">
+  
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <a href="{{ url_for('results') }}" class="btn-outline">← Back to Results</a>
+    <div style="display:flex; gap:10px;">
+      <button onclick="window.print()" class="btn-outline">🖨️ Print Report</button>
+      <button id="btnDownloadPDFFromReport" class="btn-primary">📄 Download PDF</button>
     </div>
   </div>
 
-  <!-- RISK BANNER -->
-  <div class="rpt-banner" id="rpt-banner" style="background:#6b7280">
-    <div class="r-lvl" id="rpt-lvl">— Risk Level</div>
-    <div class="r-score" id="rpt-score">Risk Score: —</div>
-  </div>
+  <!-- The printable container exported to PDF -->
+  <div id="pdfReportContent" style="background:#fff; color:#0f172a; padding:40px; border-radius:16px; border:1px solid #e2e8f0; box-shadow:0 4px 20px rgba(0,0,0,0.06);">
+    
+    <!-- Report Header -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #0d9488; padding-bottom:20px; margin-bottom:24px;">
+      <div>
+        <div style="display:flex; align-items:center; gap:8px; font-size:1.6rem; font-weight:800; color:#0f172a;">
+          <span style="font-size:1.8rem;">🫁</span> LungCare <span style="color:#0d9488;">AI</span>
+        </div>
+        <div style="font-size:0.85rem; color:#64748b; margin-top:4px;">Pulmonary Risk Stratification & Screening Platform</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:1.1rem; font-weight:800; color:#0f172a;" id="repId">#LC-8921</div>
+        <div style="font-size:0.8rem; color:#64748b;" id="repDate">—</div>
+      </div>
+    </div>
 
-  <!-- SUMMARY -->
-  <div class="rpt-sec">
-    <h3>Assessment Summary</h3>
-    <p id="rpt-summary" style="font-size:.85rem;color:#374151;line-height:1.65;padding:12px;background:#f9f9f9;border-radius:7px"></p>
-  </div>
+    <!-- Educational Disclaimer Alert -->
+    <div style="background:#fff7ed; border-left:4px solid #f97316; border-radius:8px; padding:12px 16px; margin-bottom:24px; font-size:0.85rem; color:#7c2d12; line-height:1.5;">
+      <strong>⚠️ Clinical Notice:</strong> This document is an automated risk assessment report generated for educational and pre-clinical screening purposes. It evaluates multi-factor symptom and lifestyle probabilities using machine learning ensembles. It is not an official oncological diagnosis.
+    </div>
 
-  <!-- PATIENT DATA -->
-  <div class="rpt-sec">
-    <h3>Patient Input Summary</h3>
-    <div class="rpt-grid" id="rpt-patient"></div>
-  </div>
+    <!-- Summary Box -->
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:28px;">
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px; text-align:center;">
+        <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Risk Classification</div>
+        <div id="repRiskLevel" style="font-size:1.6rem; font-weight:900; margin-top:4px; color:#0d9488;">Low Risk</div>
+      </div>
 
-  <!-- EARLY WARNINGS -->
-  <div class="rpt-sec">
-    <h3>🚨 Early Warning Signs Detected</h3>
-    <ul class="rpt-rec" id="rpt-warnings" style="padding-left:0"></ul>
-  </div>
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px; text-align:center;">
+        <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Calibrated Score</div>
+        <div id="repRiskScore" style="font-size:1.6rem; font-weight:900; margin-top:4px; color:#0f172a;">-- / 100</div>
+      </div>
 
-  <!-- CLINICAL ADVISORY -->
-  <div class="rpt-sec rpt-rec">
-    <h3>🏥 Clinical Advisory</h3>
-    <div id="rpt-clinical"></div>
-  </div>
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px; text-align:center;">
+        <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Ensemble Confidence</div>
+        <div id="repConfidence" style="font-size:1.6rem; font-weight:900; margin-top:4px; color:#0284c7;">--%</div>
+      </div>
+    </div>
 
-  <!-- WHAT TO AVOID -->
-  <div class="rpt-sec rpt-rec">
-    <h3>🚫 What to Avoid</h3>
-    <div id="rpt-avoid"></div>
-  </div>
+    <!-- Patient Reported Inputs Table -->
+    <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:12px; color:#0f172a; border-bottom:1px solid #e2e8f0; padding-bottom:6px;">
+      Patient Assessment Parameters (23 Features)
+    </h3>
+    <div style="overflow-x:auto; margin-bottom:28px;">
+      <table style="width:100%; border-collapse:collapse; font-size:0.85rem;" id="repParamsTable">
+        <thead>
+          <tr style="background:#f1f5f9; color:#475569; text-align:left;">
+            <th style="padding:8px 12px; border:1px solid #e2e8f0;">Parameter</th>
+            <th style="padding:8px 12px; border:1px solid #e2e8f0;">Reported Level</th>
+            <th style="padding:8px 12px; border:1px solid #e2e8f0;">Parameter</th>
+            <th style="padding:8px 12px; border:1px solid #e2e8f0;">Reported Level</th>
+          </tr>
+        </thead>
+        <tbody id="repParamsBody">
+          <!-- Dynamically populated from session data -->
+        </tbody>
+      </table>
+    </div>
 
-  <!-- EXERCISE -->
-  <div class="rpt-sec rpt-rec">
-    <h3>🏃 Exercise Recommendations</h3>
-    <div id="rpt-exercise"></div>
-  </div>
+    <!-- Clinical Advisories -->
+    <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:12px; color:#0f172a; border-bottom:1px solid #e2e8f0; padding-bottom:6px;">
+      Clinical & Lifestyle Advisory
+    </h3>
+    <div id="repAdvisoryBox" style="font-size:0.88rem; color:#334155; line-height:1.6; margin-bottom:24px;">
+      <!-- Populated via JS -->
+    </div>
 
-  <!-- DIET -->
-  <div class="rpt-sec rpt-rec">
-    <h3>🥗 Diet & Nutrition</h3>
-    <div id="rpt-food"></div>
-  </div>
+    <!-- Physician Guidance -->
+    <div style="background:#f0fdfa; border:1px solid #ccfbf1; border-radius:10px; padding:16px; margin-bottom:30px;">
+      <div style="font-weight:700; color:#0f766e; margin-bottom:6px;">Doctor Consultation Notes</div>
+      <div id="repDoctorNotes" style="font-size:0.85rem; color:#134e4a; line-height:1.6;">—</div>
+    </div>
 
-  <!-- DOCTOR CONSULT -->
-  <div class="rpt-sec">
-    <h3>👨‍⚕️ Doctor Consultation Advice</h3>
-    <p id="rpt-doctor" style="font-size:.85rem;color:#1a1f36;font-weight:600;padding:14px;background:#e0f9f8;border-radius:8px;line-height:1.65"></p>
-  </div>
+    <!-- Sign-off footer -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; border-top:1px solid #e2e8f0; padding-top:20px; font-size:0.8rem; color:#64748b;">
+      <div>
+        <div>LungCare AI Decision Support System</div>
+        <div>Model Architecture: Soft Voting (RF + XGB + LGBM + LR + SVM)</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="border-bottom:1px dashed #94a3b8; width:160px; height:30px; margin-bottom:4px;"></div>
+        <div>Physician Signature / Verification</div>
+      </div>
+    </div>
 
-  <!-- DISCLAIMER -->
-  <div class="rpt-disc">
-    <strong>⚠️ Important Medical Disclaimer:</strong> This report is generated by an AI-based screening tool (LungCare AI) for informational and educational purposes only. It does NOT constitute a medical diagnosis, clinical advice, or treatment recommendation. The results are based on self-reported data and a machine learning model. Always consult a qualified, licensed physician or specialist for any health concerns. Do not delay seeking professional medical care based on this report.
-  </div>
-
-  <!-- PRINT BUTTON (hidden on print) -->
-  <div class="no-print" style="text-align:center;margin-top:28px">
-    <button onclick="window.print()" style="background:var(--primary);color:#fff;padding:12px 32px;border-radius:50px;font-weight:700;font-size:.9rem;border:none;cursor:pointer">🖨️ Print / Save PDF</button>
-    <button onclick="window.close()" style="background:transparent;border:1.5px solid #e5e7eb;color:#374151;padding:12px 24px;border-radius:50px;font-weight:600;font-size:.9rem;cursor:pointer;margin-left:12px">Close</button>
   </div>
 
 </div>
-<script src="{{ url_for('static', filename='js/main.js') }}"></script>
-</body>
-</html>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const raw = sessionStorage.getItem('lungcare_assessment_result');
+  if (raw) {
+    const r = JSON.parse(raw);
+    const p = r.patient_data || {};
+
+    const repDateEl = document.getElementById('repDate');
+    if (repDateEl) repDateEl.textContent = r.timestamp || new Date().toLocaleDateString();
+
+    const repRiskLevelEl = document.getElementById('repRiskLevel');
+    if (repRiskLevelEl) {
+      repRiskLevelEl.textContent = r.risk_level + ' Risk';
+      const colorMap = { Low: '#10b981', Medium: '#f59e0b', High: '#ef4444' };
+      repRiskLevelEl.style.color = colorMap[r.risk_level] || '#0d9488';
+    }
+
+    const repRiskScoreEl = document.getElementById('repRiskScore');
+    if (repRiskScoreEl) repRiskScoreEl.textContent = r.risk_score + ' / 100';
+
+    const repConfidenceEl = document.getElementById('repConfidence');
+    if (repConfidenceEl) repConfidenceEl.textContent = r.confidence + '%';
+
+    // Populate parameters table (2 items per row)
+    const tbody = document.getElementById('repParamsBody');
+    if (tbody) {
+      const keys = Object.keys(p);
+      let html = '';
+      for (let i = 0; i < keys.length; i += 2) {
+        const k1 = keys[i];
+        const k2 = keys[i + 1];
+        html += `<tr>
+          <td style="padding:6px 12px; border:1px solid #e2e8f0; font-weight:600;">${k1}</td>
+          <td style="padding:6px 12px; border:1px solid #e2e8f0;">${k1 === 'Gender' ? (p[k1] == 1 ? 'Male' : 'Female') : p[k1]}</td>
+          ${k2 ? `
+            <td style="padding:6px 12px; border:1px solid #e2e8f0; font-weight:600;">${k2}</td>
+            <td style="padding:6px 12px; border:1px solid #e2e8f0;">${k2 === 'Gender' ? (p[k2] == 1 ? 'Male' : 'Female') : p[k2]}</td>
+          ` : '<td style="border:1px solid #e2e8f0;"></td><td style="border:1px solid #e2e8f0;"></td>'}
+        </tr>`;
+      }
+      tbody.innerHTML = html;
+    }
+
+    // Populate recommendations
+    const recs = r.recommendations || {};
+    const advEl = document.getElementById('repAdvisoryBox');
+    if (advEl && recs.clinical) {
+      advEl.innerHTML = `<ul style="padding-left:20px; list-style-type:disc;">` +
+        recs.clinical.map(c => `<li style="margin-bottom:6px;">${c}</li>`).join('') +
+        `</ul>`;
+    }
+
+    const docEl = document.getElementById('repDoctorNotes');
+    if (docEl && recs.doctor) {
+      docEl.textContent = recs.doctor;
+    }
+  }
+
+  // PDF Export
+  const btnPDF = document.getElementById('btnDownloadPDFFromReport');
+  if (btnPDF) {
+    btnPDF.addEventListener('click', () => {
+      const el = document.getElementById('pdfReportContent');
+      const opt = {
+        margin: 10,
+        filename: 'LungCare-AI-Medical-Report.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(el).save();
+    });
+  }
+});
+</script>
+{% endblock %}

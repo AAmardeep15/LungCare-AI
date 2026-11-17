@@ -1,331 +1,390 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Health Assessment — LungCare AI</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
 
-<!-- NAVBAR -->
-<nav class="navbar">
-  <div class="nav-brand">LungCare <span class="accent">AI</span></div>
-  <div class="nav-links">
-    <a href="/">Home</a>
-    <a href="/assessment" class="active">Health Check</a>
+{% block title %}Assessment Wizard — LungCare AI{% endblock %}
+
+{% block content %}
+<div class="wizard-container">
+  
+  <div class="wizard-header">
+    <h1 data-i18n="wizard.title">Pulmonary Health Assessment</h1>
+    <p data-i18n="wizard.subtitle">Complete all 3 sections to receive your calibrated lung cancer risk analysis.</p>
   </div>
-  <a href="/" class="btn-nav">← Back</a>
-</nav>
 
-<!-- LOADING OVERLAY -->
-<div class="loading-ov" id="loadingOv">
-  <div class="spinner"></div>
-  <div class="load-txt">🫁 Analyzing your health data…</div>
-  <div class="load-sub">Running 5-model ensemble prediction</div>
+  <!-- Demo Sample Filler Bar -->
+  <div class="sample-bar">
+    <span data-i18n="wizard.fill_sample">Quick Demo Fill:</span>
+    <div class="sample-btns">
+      <button type="button" class="btn-sample low" id="btnFillLow" data-i18n="wizard.low">Low Risk Demo</button>
+      <button type="button" class="btn-sample med" id="btnFillMed" data-i18n="wizard.med">Medium Risk Demo</button>
+      <button type="button" class="btn-sample high" id="btnFillHigh" data-i18n="wizard.high">High Risk Demo</button>
+    </div>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="wizard-progress-bar">
+    <div id="wizardProgressFill" class="wizard-progress-fill" style="width: 33.33%;"></div>
+  </div>
+
+  <!-- Step Pills -->
+  <div class="wizard-steps-nav">
+    <div class="wizard-step-pill active" id="pillStep1" data-i18n="wizard.step1">1. Personal</div>
+    <div class="wizard-step-pill" id="pillStep2" data-i18n="wizard.step2">2. Lifestyle & Environment</div>
+    <div class="wizard-step-pill" id="pillStep3" data-i18n="wizard.step3">3. Symptoms</div>
+  </div>
+
+  <!-- Wizard Form -->
+  <form id="assessmentForm" novalidate>
+    <div class="wizard-card">
+      
+      <!-- STEP 1: PERSONAL VITALS -->
+      <div class="wizard-step active" id="step1">
+        <h3 style="font-size:1.25rem; font-weight:800; margin-bottom:20px; color:var(--text);">Personal Demographics</h3>
+        <div class="form-grid">
+          
+          <div class="form-group">
+            <label class="form-label" for="Age">
+              <span>Age (Years)</span>
+              <span class="label-tooltip" title="Patient age in years (1 to 120)">ℹ️</span>
+            </label>
+            <input type="number" id="Age" name="Age" class="input-text" min="1" max="120" value="45" required>
+            <small style="color:var(--text-muted); font-size:0.75rem;">Age range: 1 – 120 years</small>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="Gender">
+              <span>Biological Gender</span>
+              <span class="label-tooltip" title="Biological sex as recorded in clinical datasets">ℹ️</span>
+            </label>
+            <select id="Gender" name="Gender" class="select-input" required>
+              <option value="1">1 — Male</option>
+              <option value="2">2 — Female</option>
+            </select>
+            <small style="color:var(--text-muted); font-size:0.75rem;">Standard dataset encoding (1 = Male, 2 = Female)</small>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- STEP 2: LIFESTYLE & ENVIRONMENT (10 SLIDERS) -->
+      <div class="wizard-step" id="step2">
+        <h3 style="font-size:1.25rem; font-weight:800; margin-bottom:20px; color:var(--text);">Lifestyle & Exposure Factors (Scale 1–9)</h3>
+        <div class="form-grid">
+
+          <!-- Air Pollution -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Air Pollution Exposure</span>
+              <span class="label-tooltip" title="Level of ambient particulate pollution / smog in your daily residence">ℹ️</span>
+            </div>
+            <div class="slider-wrap">
+              <span class="slider-bubble" id="bubble_Air_Pollution">3</span>
+              <input type="range" class="range-slider" id="Air_Pollution" name="Air Pollution" min="1" max="9" value="3">
+              <div class="slider-scales"><span>1 (Low)</span><span>5 (Moderate)</span><span>9 (Severe)</span></div>
+            </div>
+          </div>
+
+          <!-- Alcohol use -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Alcohol Use</span>
+              <span class="label-tooltip" title="Frequency and volume of alcohol consumption">ℹ️</span>
+            </div>
+            <div class="slider-wrap">
+              <span class="slider-bubble" id="bubble_Alcohol_use">2</span>
+              <input type="range" class="range-slider" id="Alcohol_use" name="Alcohol use" min="1" max="9" value="2">
+              <div class="slider-scales"><span>1 (None)</span><span>5 (Moderate)</span><span>9 (Heavy)</span></div>
+            </div>
+          </div>
+
+          <!-- Dust Allergy -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Dust Allergy</span>
+              <span class="label-tooltip" title="Sensitivity or allergic reactions to airborne dust mites/pollen">ℹ️</span>
+            </div>
+            <div class="slider-wrap">
+              <span class="slider-bubble" id="bubble_Dust_Allergy">2</span>
+              <input type="range" class="range-slider" id="Dust_Allergy" name="Dust Allergy" min="1" max="9" value="2">
+              <div class="slider-scales"><span>1 (None)</span><span>5 (Mild)</span><span>9 (Severe)</span></div>
+            </div>
+          </div>
+
+          <!-- Occupational Hazards -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Occupational Hazards</span>
+              <span class="label-tooltip" title="Workplace exposure to silica, asbestos, coal dust, or industrial chemicals">ℹ️</span>
+            </div>
+            <div class="slider-wrap">
+              <span class="slider-bubble" id="bubble_OccuPational_Hazards">3</span>
+              <input type="range" class="range-slider" id="OccuPational_Hazards" name="OccuPational Hazards" min="1" max="9" value="3">
+              <div class="slider-scales"><span>1 (None)</span><span>5 (Moderate)</span><span>9 (High)</span></div>
+            </div>
+          </div>
+
+          <!-- Genetic Risk -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Genetic / Family History Risk</span>
+              <span class="label-tooltip" title="Prevalence of lung or thoracic cancers among first-degree relatives">ℹ️</span>
+            </div>
+            <div class="slider-wrap">
+              <span class="slider-bubble" id="bubble_Genetic_Risk">2</span>
+              <input type="range" class="range-slider" id="Genetic_Risk" name="Genetic Risk" min="1" max="9" value="2">
+              <div class="slider-scales"><span>1 (No history)</span><span>5 (Distant)</span><span>9 (Multiple direct)</span></div>
+            </div>
+          </div>
+
+          <!-- Chronic Lung Disease -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Chronic Lung Disease History</span>
+              <span class="label-tooltip" title="Prior medical history of COPD, asthma, bronchitis, or pulmonary fibrosis">ℹ️</span>
+            </div>
+            <div class="slider-wrap">
+              <span class="slider-bubble" id="bubble_chronic_Lung_Disease">1</span>
+              <input type="range" class="range-slider" id="chronic_Lung_Disease" name="chronic Lung Disease" min="1" max="9" value="1">
+              <div class="slider-scales"><span>1 (None)</span><span>5 (Managed)</span><span>9 (Severe COPD)</span></div>
+            </div>
+          </div>
+
+          <!-- Balanced Diet -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Balanced Diet Quality</span>
+              <span class="label-tooltip" title="Frequency of antioxidant-rich fruits, cruciferous vegetables, and Mediterranean eating patterns (Higher = Healthier)">ℹ️</span>
+            </div>
+            <div class="slider-wrap">
+              <span class="slider-bubble" id="bubble_Balanced_Diet">6</span>
+              <input type="range" class="range-slider" id="Balanced_Diet" name="Balanced Diet" min="1" max="9" value="6">
+              <div class="slider-scales"><span>1 (Poor/Processed)</span><span>5 (Average)</span><span>9 (Optimal/Mediterranean)</span></div>
+            </div>
+          </div>
+
+          <!-- Obesity -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Obesity / High BMI</span>
+              <span class="label-tooltip" title="Body Mass Index (BMI) tier and systemic adiposity level">ℹ️</span>
+            </div>
+            <div class="slider-wrap">
+              <span class="slider-bubble" id="bubble_Obesity">2</span>
+              <input type="range" class="range-slider" id="Obesity" name="Obesity" min="1" max="9" value="2">
+              <div class="slider-scales"><span>1 (Normal BMI)</span><span>5 (Overweight)</span><span>9 (Obese III)</span></div>
+            </div>
+          </div>
+
+          <!-- Smoking -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Active Smoking Habit</span>
+              <span class="label-tooltip" title="Cigarettes, bidis, or cigars smoked daily (Single largest lung cancer risk factor)">ℹ️</span>
+            </div>
+            <div class="slider-wrap">
+              <span class="slider-bubble" id="bubble_Smoking">2</span>
+              <input type="range" class="range-slider" id="Smoking" name="Smoking" min="1" max="9" value="2">
+              <div class="slider-scales"><span>1 (Non-smoker)</span><span>5 (Half pack/day)</span><span>9 (Heavy 1+ packs)</span></div>
+            </div>
+          </div>
+
+          <!-- Passive Smoker -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Second-Hand (Passive) Smoker</span>
+              <span class="label-tooltip" title="Environmental tobacco smoke exposure in household or workplace">ℹ️</span>
+            </div>
+            <div class="slider-wrap">
+              <span class="slider-bubble" id="bubble_Passive_Smoker">2</span>
+              <input type="range" class="range-slider" id="Passive_Smoker" name="Passive Smoker" min="1" max="9" value="2">
+              <div class="slider-scales"><span>1 (None)</span><span>5 (Occasional)</span><span>9 (Daily indoor)</span></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- STEP 3: RESPIRATORY SYMPTOMS (11 SLIDERS) -->
+      <div class="wizard-step" id="step3">
+        <h3 style="font-size:1.25rem; font-weight:800; margin-bottom:20px; color:var(--text);">Respiratory Symptoms & Signs (Scale 1–9)</h3>
+        <div class="form-grid">
+
+          <!-- Chest Pain -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Chest Pain</span>
+              <span class="label-tooltip" title="Substernal or pleuritic pain during deep inhalation or coughing">ℹ️</span>
+            </div>
+            <div class="slider-wrap">
+              <span class="slider-bubble" id="bubble_Chest_Pain">2</span>
+              <input type="range" class="range-slider" id="Chest_Pain" name="Chest Pain" min="1" max="9" value="2">
+              <div class="slider-scales"><span>1 (None)</span><span>5 (Moderate)</span><span>9 (Severe)</span></div>
+            </div>
+          </div>
+
+          <!-- Coughing of Blood -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Hemoptysis (Coughing Blood)</span>
+              <span class="label-tooltip" title="Presence of blood streaks or frank blood in sputum (Critical Red Flag)">ℹ️</span>
+            </div>
+            <div class="slider-wrap">
+              <span class="slider-bubble" id="bubble_Coughing_of_Blood">1</span>
+              <input type="range" class="range-slider" id="Coughing_of_Blood" name="Coughing of Blood" min="1" max="9" value="1">
+              <div class="slider-scales"><span>1 (Never)</span><span>5 (Streaks)</span><span>9 (Frequent)</span></div>
+            </div>
+          </div>
+
+          <!-- Fatigue -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Fatigue & Lethargy</span>
+              <span class="label-tooltip" title="Unexplained chronic exhaustion unrelieved by rest">ℹ️</span>
+            </div>
+            <div class="slider-wrap">
+              <span class="slider-bubble" id="bubble_Fatigue">2</span>
+              <input type="range" class="range-slider" id="Fatigue" name="Fatigue" min="1" max="9" value="2">
+              <div class="slider-scales"><span>1 (Normal energy)</span><span>5 (Moderate)</span><span>9 (Debilitating)</span></div>
+            </div>
+          </div>
+
+          <!-- Weight Loss -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Unexplained Weight Loss</span>
+              <span class="label-tooltip" title="Involuntary loss of >5% body mass over a 3-6 month period">ℹ️</span>
+            </div>
+            <div class="slider-wrap">
+              <span class="slider-bubble" id="bubble_Weight_Loss">1</span>
+              <input type="range" class="range-slider" id="Weight_Loss" name="Weight Loss" min="1" max="9" value="1">
+              <div class="slider-scales"><span>1 (Stable)</span><span>5 (Mild loss)</span><span>9 (Severe cachexia)</span></div>
+            </div>
+          </div>
+
+          <!-- Shortness of Breath -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Shortness of Breath (Dyspnea)</span>
+              <span class="label-tooltip" title="Breathlessness during minimal exertion or at rest">ℹ️</span>
+            </div>
+            <div class="slider-wrap">
+              <span class="slider-bubble" id="bubble_Shortness_of_Breath">2</span>
+              <input type="range" class="range-slider" id="Shortness_of_Breath" name="Shortness of Breath" min="1" max="9" value="2">
+              <div class="slider-scales"><span>1 (None)</span><span>5 (On stairs)</span><span>9 (At rest)</span></div>
+            </div>
+          </div>
+
+          <!-- Wheezing -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Wheezing Sound</span>
+              <span class="label-tooltip" title="High-pitched whistling sound during breathing">ℹ️</span>
+            </div>
+            <div class="slider-wrap">
+              <span class="slider-bubble" id="bubble_Wheezing">1</span>
+              <input type="range" class="range-slider" id="Wheezing" name="Wheezing" min="1" max="9" value="1">
+              <div class="slider-scales"><span>1 (Clear breath)</span><span>5 (Occasional)</span><span>9 (Constant)</span></div>
+            </div>
+          </div>
+
+          <!-- Swallowing Difficulty -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Swallowing Difficulty (Dysphagia)</span>
+              <span class="label-tooltip" title="Pain or sensation of food getting stuck in the chest/throat">ℹ️</span>
+            </div>
+            <div class="slider-wrap">
+              <span class="slider-bubble" id="bubble_Swallowing_Difficulty">1</span>
+              <input type="range" class="range-slider" id="Swallowing_Difficulty" name="Swallowing Difficulty" min="1" max="9" value="1">
+              <div class="slider-scales"><span>1 (Normal)</span><span>5 (Solids only)</span><span>9 (Liquids and solids)</span></div>
+            </div>
+          </div>
+
+          <!-- Clubbing of Finger Nails -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Clubbing of Finger Nails</span>
+              <span class="label-tooltip" title="Curvature and enlargement of fingertips associated with chronic hypoxia">ℹ️</span>
+            </div>
+            <div class="slider-wrap">
+              <span class="slider-bubble" id="bubble_Clubbing_of_Finger_Nails">1</span>
+              <input type="range" class="range-slider" id="Clubbing_of_Finger_Nails" name="Clubbing of Finger Nails" min="1" max="9" value="1">
+              <div class="slider-scales"><span>1 (Normal nails)</span><span>5 (Spongy bed)</span><span>9 (Distinct drumstick)</span></div>
+            </div>
+          </div>
+
+          <!-- Frequent Cold -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Frequent Respiratory Infections</span>
+              <span class="label-tooltip" title="Recurrent episodes of bronchitis, pneumonia, or chest infections">ℹ️</span>
+            </div>
+            <div class="slider-wrap">
+              <span class="slider-bubble" id="bubble_Frequent_Cold">2</span>
+              <input type="range" class="range-slider" id="Frequent_Cold" name="Frequent Cold" min="1" max="9" value="2">
+              <div class="slider-scales"><span>1 (Rarely)</span><span>5 (2-3/year)</span><span>9 (Frequent/Chronic)</span></div>
+            </div>
+          </div>
+
+          <!-- Dry Cough -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Persistent Dry Cough</span>
+              <span class="label-tooltip" title="Chronic hacking cough lasting longer than 3-4 consecutive weeks">ℹ️</span>
+            </div>
+            <div class="slider-wrap">
+              <span class="slider-bubble" id="bubble_Dry_Cough">2</span>
+              <input type="range" class="range-slider" id="Dry_Cough" name="Dry Cough" min="1" max="9" value="2">
+              <div class="slider-scales"><span>1 (None)</span><span>5 (Intermittent)</span><span>9 (Constant chronic)</span></div>
+            </div>
+          </div>
+
+          <!-- Snoring -->
+          <div class="form-group">
+            <div class="form-label">
+              <span>Chronic Snoring</span>
+              <span class="label-tooltip" title="Heavy snoring or obstructive sleep apnea episodes during sleep">ℹ️</span>
+            </div>
+            <div class="slider-wrap">
+              <span class="slider-bubble" id="bubble_Snoring">2</span>
+              <input type="range" class="range-slider" id="Snoring" name="Snoring" min="1" max="9" value="2">
+              <div class="slider-scales"><span>1 (None)</span><span>5 (Occasional)</span><span>9 (Loud nightly)</span></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- WIZARD BUTTONS -->
+      <div class="wizard-footer">
+        <button type="button" id="prevBtn" class="btn-outline" style="visibility:hidden;" data-i18n="wizard.prev">
+          ← Previous
+        </button>
+
+        <div style="display:flex; gap:12px;">
+          <button type="button" id="nextBtn" class="btn-primary" data-i18n="wizard.next">
+            Next Step →
+          </button>
+          <button type="submit" id="submitBtn" class="btn-primary" style="display:none;" data-i18n="wizard.submit">
+            Analyze Pulmonary Risk ⚡
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </form>
+
+  <!-- Loading Animation Modal Overlay -->
+  <div id="loadingOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:99999; backdrop-filter:blur(6px); align-items:center; justify-content:center; flex-direction:column; color:#fff;">
+    <div style="width:60px; height:60px; border:6px solid rgba(255,255,255,0.2); border-top-color:var(--primary); border-radius:50%; animation:spin 1s linear infinite; margin-bottom:20px;"></div>
+    <div style="font-size:1.3rem; font-weight:800;" data-i18n="wizard.loading">Analyzing with AI Ensemble...</div>
+    <div style="font-size:0.85rem; color:#cbd5e1; margin-top:8px;">Running RF + XGBoost + LightGBM + LogisticRegression + SVM + SHAP</div>
+  </div>
+
 </div>
 
-<!-- ASSESSMENT PAGE -->
-<div class="asmnt-page">
-  <div class="asmnt-wrap">
-
-    <div class="asmnt-hdr">
-      <h1>Lung Cancer Risk Assessment</h1>
-      <p>Answer all 23 questions honestly for the most accurate prediction. Use the sliders to indicate severity (1 = None / 9 = Severe).</p>
-    </div>
-
-    <!-- Progress -->
-    <div class="prog-bar-bg"><div class="prog-bar" id="progBar"></div></div>
-
-    <!-- Step Indicators -->
-    <div class="step-inds">
-      <div class="step-ind active" id="step-ind-0"><div class="ind-dot">1</div><span>Personal Info</span></div>
-      <div class="step-ind" id="step-ind-1"><div class="ind-dot">2</div><span>Lifestyle</span></div>
-      <div class="step-ind" id="step-ind-2"><div class="ind-dot">3</div><span>Environment</span></div>
-      <div class="step-ind" id="step-ind-3"><div class="ind-dot">4</div><span>Medical History</span></div>
-      <div class="step-ind" id="step-ind-4"><div class="ind-dot">5</div><span>Symptoms</span></div>
-    </div>
-
-    <!-- ── STEP 1: Personal Info ──────────────────────────────────────── -->
-    <div class="form-sec active" id="step-0">
-      <div class="sec-hdr">
-        <div class="sec-ic">👤</div>
-        <div><div class="sec-h">Personal Information</div><div class="sec-sh">Basic demographic details</div></div>
-      </div>
-      <div class="fields-grid one">
-        <div class="field-grp">
-          <label class="field-lbl">Age</label>
-          <div class="field-desc">Enter your current age in years (14–73)</div>
-          <div class="slider-row">
-            <input type="range" data-field="Age" min="14" max="73" value="35" style="--pct:35%">
-            <div class="slider-val">35</div>
-          </div>
-          <div class="slider-lbls"><span>14 yrs</span><span>43 yrs</span><span>73 yrs</span></div>
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">Gender</label>
-          <div class="field-desc">Select your biological gender</div>
-          <div class="gender-opts">
-            <input type="radio" name="gender" id="g-male" class="gender-opt" data-field="Gender" value="1" checked>
-            <label for="g-male">♂ Male</label>
-            <input type="radio" name="gender" id="g-female" class="gender-opt" data-field="Gender" value="0">
-            <label for="g-female">♀ Female</label>
-          </div>
-        </div>
-      </div>
-      <div class="form-nav">
-        <div></div>
-        <button class="btn-next" onclick="nextStep()">Lifestyle Factors →</button>
-      </div>
-    </div>
-
-    <!-- ── STEP 2: Lifestyle ──────────────────────────────────────────── -->
-    <div class="form-sec" id="step-1">
-      <div class="sec-hdr">
-        <div class="sec-ic">🚬</div>
-        <div><div class="sec-h">Lifestyle Factors</div><div class="sec-sh">Habits and lifestyle choices that affect lung health</div></div>
-      </div>
-      <div class="fields-grid">
-        <div class="field-grp">
-          <label class="field-lbl">Smoking</label>
-          <div class="field-desc">1 = Never smoked &nbsp;|&nbsp; 4–5 = Occasional &nbsp;|&nbsp; 8 = Heavy smoker (>20/day)</div>
-          <div class="slider-row">
-            <input type="range" data-field="Smoking" min="1" max="8" value="1">
-            <div class="slider-val">1</div>
-          </div>
-          <div class="slider-lbls"><span>None</span><span>Moderate</span><span>Heavy</span></div>
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">Alcohol Use</label>
-          <div class="field-desc">1 = Non-drinker &nbsp;|&nbsp; 4–5 = Social drinker &nbsp;|&nbsp; 8 = Heavy daily drinker</div>
-          <div class="slider-row">
-            <input type="range" data-field="Alcohol use" min="1" max="8" value="1">
-            <div class="slider-val">1</div>
-          </div>
-          <div class="slider-lbls"><span>None</span><span>Social</span><span>Heavy</span></div>
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">Passive Smoking</label>
-          <div class="field-desc">Exposure to second-hand smoke at home/work</div>
-          <div class="slider-row">
-            <input type="range" data-field="Passive Smoker" min="1" max="8" value="1">
-            <div class="slider-val">1</div>
-          </div>
-          <div class="slider-lbls"><span>None</span><span>Occasional</span><span>High</span></div>
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">Balanced Diet</label>
-          <div class="field-desc">1 = Very poor diet &nbsp;|&nbsp; 4 = Average &nbsp;|&nbsp; 7 = Excellent, nutrient-rich diet</div>
-          <div class="slider-row">
-            <input type="range" data-field="Balanced Diet" min="1" max="7" value="4">
-            <div class="slider-val">4</div>
-          </div>
-          <div class="slider-lbls"><span>Poor</span><span>Average</span><span>Excellent</span></div>
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">Obesity</label>
-          <div class="field-desc">1 = Healthy weight &nbsp;|&nbsp; 4 = Overweight &nbsp;|&nbsp; 7 = Severely obese</div>
-          <div class="slider-row">
-            <input type="range" data-field="Obesity" min="1" max="7" value="2">
-            <div class="slider-val">2</div>
-          </div>
-          <div class="slider-lbls"><span>Healthy</span><span>Overweight</span><span>Obese</span></div>
-        </div>
-      </div>
-      <div class="form-nav">
-        <button class="btn-back" onclick="prevStep()">← Back</button>
-        <button class="btn-next" onclick="nextStep()">Environment →</button>
-      </div>
-    </div>
-
-    <!-- ── STEP 3: Environment ────────────────────────────────────────── -->
-    <div class="form-sec" id="step-2">
-      <div class="sec-hdr">
-        <div class="sec-ic">🏭</div>
-        <div><div class="sec-h">Environmental Exposure</div><div class="sec-sh">Workplace and environmental risk factors</div></div>
-      </div>
-      <div class="fields-grid">
-        <div class="field-grp">
-          <label class="field-lbl">Air Pollution Exposure</label>
-          <div class="field-desc">1 = Clean rural/suburban air &nbsp;|&nbsp; 8 = Severely polluted industrial area</div>
-          <div class="slider-row">
-            <input type="range" data-field="Air Pollution" min="1" max="8" value="2">
-            <div class="slider-val">2</div>
-          </div>
-          <div class="slider-lbls"><span>Clean</span><span>Moderate</span><span>Severe</span></div>
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">Dust Allergy</label>
-          <div class="field-desc">Level of dust allergy and respiratory sensitivity</div>
-          <div class="slider-row">
-            <input type="range" data-field="Dust Allergy" min="1" max="8" value="2">
-            <div class="slider-val">2</div>
-          </div>
-          <div class="slider-lbls"><span>None</span><span>Moderate</span><span>Severe</span></div>
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">Occupational Hazards</label>
-          <div class="field-desc">Exposure to asbestos, silica, chemicals, paint fumes at work</div>
-          <div class="slider-row">
-            <input type="range" data-field="OccuPational Hazards" min="1" max="8" value="1">
-            <div class="slider-val">1</div>
-          </div>
-          <div class="slider-lbls"><span>None</span><span>Moderate</span><span>High</span></div>
-        </div>
-      </div>
-      <div class="form-nav">
-        <button class="btn-back" onclick="prevStep()">← Back</button>
-        <button class="btn-next" onclick="nextStep()">Medical History →</button>
-      </div>
-    </div>
-
-    <!-- ── STEP 4: Medical History ────────────────────────────────────── -->
-    <div class="form-sec" id="step-3">
-      <div class="sec-hdr">
-        <div class="sec-ic">🧬</div>
-        <div><div class="sec-h">Medical History</div><div class="sec-sh">Genetic predisposition and pre-existing conditions</div></div>
-      </div>
-      <div class="fields-grid">
-        <div class="field-grp">
-          <label class="field-lbl">Genetic Risk</label>
-          <div class="field-desc">Family history of lung cancer or other cancers (parents, siblings)</div>
-          <div class="slider-row">
-            <input type="range" data-field="Genetic Risk" min="1" max="7" value="1">
-            <div class="slider-val">1</div>
-          </div>
-          <div class="slider-lbls"><span>No history</span><span>Moderate</span><span>Strong family history</span></div>
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">Chronic Lung Disease</label>
-          <div class="field-desc">History of COPD, asthma, bronchitis, emphysema, or pulmonary fibrosis</div>
-          <div class="slider-row">
-            <input type="range" data-field="chronic Lung Disease" min="1" max="7" value="1">
-            <div class="slider-val">1</div>
-          </div>
-          <div class="slider-lbls"><span>None</span><span>Mild</span><span>Severe/Chronic</span></div>
-        </div>
-      </div>
-      <div class="form-nav">
-        <button class="btn-back" onclick="prevStep()">← Back</button>
-        <button class="btn-next" onclick="nextStep()">Symptoms →</button>
-      </div>
-    </div>
-
-    <!-- ── STEP 5: Symptoms ───────────────────────────────────────────── -->
-    <div class="form-sec" id="step-4">
-      <div class="sec-hdr">
-        <div class="sec-ic">🩺</div>
-        <div><div class="sec-h">Current Symptoms</div><div class="sec-sh">1 = None / Not present &nbsp;|&nbsp; 9 = Severe / Daily occurrence</div></div>
-      </div>
-      <div class="fields-grid">
-        <div class="field-grp">
-          <label class="field-lbl">🩸 Coughing of Blood (Hemoptysis)</label>
-          <div class="field-desc">Blood-stained sputum or coughing up blood</div>
-          <div class="slider-row">
-            <input type="range" data-field="Coughing of Blood" min="1" max="9" value="1">
-            <div class="slider-val">1</div>
-          </div>
-          <div class="slider-lbls"><span>Never</span><span>Occasional</span><span>Frequent</span></div>
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">💔 Chest Pain</label>
-          <div class="field-desc">Persistent chest tightness, ache, or sharp pain</div>
-          <div class="slider-row">
-            <input type="range" data-field="Chest Pain" min="1" max="9" value="1">
-            <div class="slider-val">1</div>
-          </div>
-          <div class="slider-lbls"><span>None</span><span>Mild</span><span>Severe</span></div>
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">😮‍💨 Shortness of Breath</label>
-          <div class="field-desc">Dyspnea at rest or on minimal exertion</div>
-          <div class="slider-row">
-            <input type="range" data-field="Shortness of Breath" min="1" max="9" value="1">
-            <div class="slider-val">1</div>
-          </div>
-          <div class="slider-lbls"><span>None</span><span>On exertion</span><span>At rest</span></div>
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">🌬️ Wheezing</label>
-          <div class="field-desc">High-pitched whistling sound when breathing</div>
-          <div class="slider-row">
-            <input type="range" data-field="Wheezing" min="1" max="8" value="1">
-            <div class="slider-val">1</div>
-          </div>
-          <div class="slider-lbls"><span>None</span><span>Occasional</span><span>Constant</span></div>
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">😴 Fatigue</label>
-          <div class="field-desc">Persistent tiredness that doesn't improve with rest</div>
-          <div class="slider-row">
-            <input type="range" data-field="Fatigue" min="1" max="9" value="1">
-            <div class="slider-val">1</div>
-          </div>
-          <div class="slider-lbls"><span>None</span><span>Moderate</span><span>Severe</span></div>
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">⚖️ Unexplained Weight Loss</label>
-          <div class="field-desc">Unintentional weight loss without change in diet</div>
-          <div class="slider-row">
-            <input type="range" data-field="Weight Loss" min="1" max="8" value="1">
-            <div class="slider-val">1</div>
-          </div>
-          <div class="slider-lbls"><span>None</span><span>Mild</span><span>Significant</span></div>
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">🍽️ Swallowing Difficulty (Dysphagia)</label>
-          <div class="field-desc">Difficulty or pain when swallowing food or liquids</div>
-          <div class="slider-row">
-            <input type="range" data-field="Swallowing Difficulty" min="1" max="8" value="1">
-            <div class="slider-val">1</div>
-          </div>
-          <div class="slider-lbls"><span>None</span><span>Mild</span><span>Severe</span></div>
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">💅 Clubbing of Finger Nails</label>
-          <div class="field-desc">Widening and rounding of fingertips / nails</div>
-          <div class="slider-row">
-            <input type="range" data-field="Clubbing of Finger Nails" min="1" max="9" value="1">
-            <div class="slider-val">1</div>
-          </div>
-          <div class="slider-lbls"><span>Normal</span><span>Mild</span><span>Pronounced</span></div>
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">🤧 Frequent Cold</label>
-          <div class="field-desc">Recurrent upper respiratory tract infections</div>
-          <div class="slider-row">
-            <input type="range" data-field="Frequent Cold" min="1" max="7" value="1">
-            <div class="slider-val">1</div>
-          </div>
-          <div class="slider-lbls"><span>Rarely</span><span>Monthly</span><span>Weekly</span></div>
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">😤 Dry Cough</label>
-          <div class="field-desc">Persistent dry cough lasting more than 2–3 weeks</div>
-          <div class="slider-row">
-            <input type="range" data-field="Dry Cough" min="1" max="7" value="1">
-            <div class="slider-val">1</div>
-          </div>
-          <div class="slider-lbls"><span>None</span><span>Occasional</span><span>Persistent</span></div>
-        </div>
-        <div class="field-grp">
-          <label class="field-lbl">😴 Snoring</label>
-          <div class="field-desc">Loud or habitual snoring during sleep</div>
-          <div class="slider-row">
-            <input type="range" data-field="Snoring" min="1" max="7" value="1">
-            <div class="slider-val">1</div>
-          </div>
-          <div class="slider-lbls"><span>None</span><span>Moderate</span><span>Severe</span></div>
-        </div>
-      </div>
-      <div class="form-nav">
-        <button class="btn-back" onclick="prevStep()">← Back</button>
-        <button class="btn-submit" onclick="submitAssessment()">🔍 Analyze My Risk →</button>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<script src="{{ url_for('static', filename='js/main.js') }}"></script>
-</body>
-</html>
+<style>
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}

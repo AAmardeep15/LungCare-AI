@@ -1,185 +1,240 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Your Results — LungCare AI</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
 
-<!-- NAVBAR -->
-<nav class="navbar">
-  <div class="nav-brand">LungCare <span class="accent">AI</span></div>
-  <div class="nav-links">
-    <a href="/">Home</a>
-    <a href="/assessment">New Assessment</a>
-  </div>
-  <button class="btn-nav" onclick="downloadReport()">⬇ Download Report</button>
-</nav>
+{% block title %}Assessment Results & Clinical Advisory — LungCare AI{% endblock %}
 
-<div class="results-page">
-
-  <!-- RESULTS HERO -->
-  <div class="res-hero">
-    <div class="res-topbar">
-      <a href="/assessment" class="back-link">← New Assessment</a>
-      <button class="btn-dl" onclick="downloadReport()">📄 Download PDF Report</button>
+{% block content %}
+<div class="results-page" id="printableReport">
+  
+  <!-- Header with timestamp and Report ID -->
+  <div class="results-header">
+    <div>
+      <h1 data-i18n="results.title">Assessment Results</h1>
+      <div class="results-meta">
+        Report Generated: <span id="reportTimestamp">—</span> | Patient ID: <span id="reportId" style="font-weight:700;">#LC-{{ range(1000, 9999) | random }}</span>
+      </div>
     </div>
 
-    <div class="res-overview">
-
-      <!-- Gauge -->
-      <div class="gauge-cont">
-        <div class="score-gauge">
-          <svg viewBox="0 0 140 140" width="150" height="150">
-            <circle class="gauge-track" cx="70" cy="70" r="60"/>
-            <circle class="gauge-fill" cx="70" cy="70" r="60" stroke-dasharray="377" stroke-dashoffset="377"/>
-          </svg>
-          <div class="score-center">
-            <div class="score-num" id="score-num">--</div>
-            <div class="score-out">/100</div>
-          </div>
-        </div>
-        <div class="risk-badge" id="risk-badge">● --</div>
-      </div>
-
-      <!-- Summary -->
-      <div class="ov-mid">
-        <h2 id="ov-title">Analyzing Your Results…</h2>
-        <p id="ov-summary">Please wait while we process your assessment data.</p>
-      </div>
-
-      <!-- Prob bars -->
-      <div class="prob-bars">
-        <div style="font-size:.8rem;font-weight:700;color:var(--dark);margin-bottom:4px">Risk Probability</div>
-        <div class="prob-row">
-          <span class="prob-name">Low</span>
-          <div class="prob-track"><div class="prob-fill" data-level="Low"></div></div>
-          <span class="prob-pct" data-level="Low">—</span>
-        </div>
-        <div class="prob-row">
-          <span class="prob-name">Medium</span>
-          <div class="prob-track"><div class="prob-fill" data-level="Medium"></div></div>
-          <span class="prob-pct" data-level="Medium">—</span>
-        </div>
-        <div class="prob-row">
-          <span class="prob-name">High</span>
-          <div class="prob-track"><div class="prob-fill" data-level="High"></div></div>
-          <span class="prob-pct" data-level="High">—</span>
-        </div>
-      </div>
-
+    <!-- Quick action links -->
+    <div style="display:flex; gap:10px;">
+      <button class="btn-outline" id="btnSaveHistory" data-i18n="results.btn_history">💾 Save to History</button>
+      <button class="btn-primary" id="btnExportPDF" data-i18n="results.btn_pdf">📄 Download PDF</button>
     </div>
   </div>
 
-  <!-- RESULTS BODY -->
-  <div class="res-body">
+  <!-- Educational Disclaimer Box -->
+  <div style="background:var(--risk-med-bg); border-left:4px solid var(--risk-med); border-radius:var(--radius-md); padding:14px 18px; margin-bottom:28px; font-size:0.88rem; color:var(--text); line-height:1.5;">
+    <strong>⚠️ Educational Risk Estimate:</strong> This assessment is an automated machine learning screening estimate based on self-reported risk parameters and does not constitute a definitive medical diagnosis. If you experience hemoptysis (coughing blood), sudden chest pain, or rapid breathing distress, consult a qualified physician immediately.
+  </div>
 
-    <!-- LEFT COLUMN -->
-    <div class="res-left">
+  <!-- TOP DASHBOARD: Gauge + Donut Chart -->
+  <div class="dashboard-grid">
+    
+    <!-- 1. Semicircle Risk Gauge Card -->
+    <div class="gauge-card">
+      <div style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;" data-i18n="results.gauge_title">
+        Calibrated Risk Score
+      </div>
 
-      <!-- Early Warnings -->
-      <div class="res-card">
-        <div class="res-card-hdr">
-          <span class="res-card-ic">🚨</span>
-          <span class="res-card-title">Early Warning System</span>
-        </div>
-        <div class="res-card-body">
-          <div class="warn-list" id="warnList">
-            <div class="empty-warn">Loading…</div>
-          </div>
+      <div class="gauge-box">
+        <canvas id="gaugeCanvas" width="240" height="130"></canvas>
+        <div class="gauge-center-text">
+          <div class="gauge-score" id="riskScoreVal">--</div>
+          <div class="gauge-denom">/ 100</div>
         </div>
       </div>
 
-      <!-- Pattern Recognition -->
-      <div class="res-card">
-        <div class="res-card-hdr">
-          <span class="res-card-ic">🔎</span>
-          <span class="res-card-title">Pattern Recognition</span>
-        </div>
-        <div class="res-card-body">
-          <div class="pat-list" id="patList">
-            <div class="empty-warn">Loading…</div>
-          </div>
-        </div>
+      <div id="riskLevelBadge" class="gauge-level-badge" style="background:var(--surface-alt); color:var(--text);">
+        Analyzing...
       </div>
-
-      <!-- Recommendations -->
-      <div class="res-card">
-        <div class="res-card-hdr">
-          <span class="res-card-ic">💡</span>
-          <span class="res-card-title">Personalized Recommendations</span>
-        </div>
-        <div class="res-card-body">
-          <!-- Tabs -->
-          <div class="rec-tabs">
-            <button class="rec-tab active" data-tab="clinical"  onclick="switchTab('clinical')">🏥 Clinical</button>
-            <button class="rec-tab"        data-tab="avoid"     onclick="switchTab('avoid')">🚫 Avoid</button>
-            <button class="rec-tab"        data-tab="exercise"  onclick="switchTab('exercise')">🏃 Exercise</button>
-            <button class="rec-tab"        data-tab="food"      onclick="switchTab('food')">🥗 Diet</button>
-            <button class="rec-tab"        data-tab="doctor"    onclick="switchTab('doctor')">👨‍⚕️ Doctor</button>
-          </div>
-
-          <div class="rec-panel active" data-panel="clinical"  id="rec-clinical"></div>
-          <div class="rec-panel"        data-panel="avoid"     id="rec-avoid"></div>
-          <div class="rec-panel"        data-panel="exercise"  id="rec-exercise"></div>
-          <div class="rec-panel"        data-panel="food"      id="rec-food"></div>
-          <div class="rec-panel"        data-panel="doctor">
-            <div class="doc-box" id="docBox"></div>
-            <div style="font-size:.8rem;font-weight:600;color:var(--dark);margin-bottom:8px">Next Steps:</div>
-            <div class="next-steps" id="nextSteps"></div>
-          </div>
-        </div>
+      <div style="font-size:0.8rem; color:var(--text-muted); margin-top:8px;">
+        <span data-i18n="results.confidence">Model Confidence</span>: <strong id="confidenceVal">--%</strong>
       </div>
-
     </div>
 
-    <!-- RIGHT COLUMN -->
-    <div class="res-right">
+    <!-- 2. Probability Donut Chart Card -->
+    <div class="chart-card">
+      <div style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:12px;" data-i18n="results.prob_title">
+        Risk Probability Breakdown
+      </div>
+      <div style="width:200px; height:200px; position:relative;">
+        <canvas id="donutChartCanvas"></canvas>
+      </div>
+      <div id="probPercentages" style="display:flex; gap:16px; font-size:0.8rem; font-weight:700; margin-top:12px;">
+        <span style="color:var(--risk-low);">Low: <span id="probLow">--%</span></span>
+        <span style="color:var(--risk-med);">Medium: <span id="probMed">--%</span></span>
+        <span style="color:var(--risk-high);">High: <span id="probHigh">--%</span></span>
+      </div>
+    </div>
 
-      <!-- Patient Summary -->
-      <div class="res-card">
-        <div class="res-card-hdr">
-          <span class="res-card-ic">👤</span>
-          <span class="res-card-title">Patient Summary</span>
+  </div>
+
+  <!-- CHARTS ROW: Radar Chart + SHAP Explainability -->
+  <div class="charts-row">
+    
+    <!-- Radar Chart: Factor Profiles -->
+    <div class="chart-card" style="align-items:stretch;">
+      <div style="font-size:0.85rem; font-weight:700; color:var(--text); margin-bottom:12px;" data-i18n="results.radar_title">
+        Multi-Factor Risk Radar
+      </div>
+      <div style="height:280px; position:relative;">
+        <canvas id="radarChartCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- SHAP Horizontal Bar Chart: Why this result? -->
+    <div class="chart-card" style="align-items:stretch;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+        <div style="font-size:0.85rem; font-weight:700; color:var(--text);" data-i18n="results.shap_title">
+          Why This Result? (SHAP Explainability)
         </div>
-        <div class="res-card-body">
-          <div class="pat-grid" id="patSummary"></div>
-          <div class="ts-row" id="ts-row"></div>
-        </div>
+        <span style="font-size:0.7rem; background:var(--surface-alt); padding:3px 8px; border-radius:var(--radius-pill); color:var(--text-muted);">AI Attribution</span>
+      </div>
+      <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:12px;" data-i18n="results.shap_sub">
+        Features having the strongest positive and negative impact on risk level
+      </div>
+      <div style="height:250px; position:relative;">
+        <canvas id="shapBarCanvas"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ALARMS & PATTERNS GRID -->
+  <div class="alarms-grid">
+    <!-- Early Warnings -->
+    <div class="alarm-card">
+      <h3 style="color:var(--risk-high);"><span data-i18n="results.early_warnings">Early Warning Indicators</span> 🚨</h3>
+      <div id="earlyWarningsContainer">
+        <p style="color:var(--text-muted); font-size:0.88rem;">No critical emergency indicators flagged.</p>
+      </div>
+    </div>
+
+    <!-- Pattern Synergies -->
+    <div class="alarm-card">
+      <h3 style="color:var(--secondary);"><span data-i18n="results.patterns">Pattern Recognition Analysis</span> 🧬</h3>
+      <div id="patternsContainer">
+        <p style="color:var(--text-muted); font-size:0.88rem;">No complex multi-factor risk synergies detected.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECOMMENDATIONS TABS -->
+  <div class="tabs-wrap">
+    <h3 style="font-size:1.25rem; font-weight:800; margin-bottom:16px;" data-i18n="results.recs_title">Personalized Recommendations</h3>
+    
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="tabClinical" data-i18n="results.tab_clinical">Clinical & Tests</button>
+      <button class="tab-btn" data-tab="tabAvoid" data-i18n="results.tab_avoid">Factors to Avoid</button>
+      <button class="tab-btn" data-tab="tabExercise" data-i18n="results.tab_exercise">Breathing & Activity</button>
+      <button class="tab-btn" data-tab="tabFood" data-i18n="results.tab_food">Nutrition & Diet</button>
+      <button class="tab-btn" data-tab="tabDoctor" data-i18n="results.tab_doctor">Doctor Consultation</button>
+    </div>
+
+    <div class="tab-content">
+      <div class="tab-pane active" id="tabClinical">
+        <div class="recs-list" id="recsClinical"></div>
+      </div>
+      <div class="tab-pane" id="tabAvoid">
+        <div class="recs-list" id="recsAvoid"></div>
+      </div>
+      <div class="tab-pane" id="tabExercise">
+        <div class="recs-list" id="recsExercise"></div>
+      </div>
+      <div class="tab-pane" id="tabFood">
+        <div class="recs-list" id="recsFood"></div>
+      </div>
+      <div class="tab-pane" id="tabDoctor">
+        <div id="recsDoctor" style="font-size:0.95rem; color:var(--text); line-height:1.7; background:var(--surface-alt); padding:16px; border-radius:var(--radius-md); border-left:4px solid var(--primary);"></div>
+      </div>
+    </div>
+
+    <!-- Recommended Next Steps Timeline -->
+    <div style="margin-top:28px; border-top:1px solid var(--border); padding-top:20px;">
+      <h4 style="font-size:1rem; font-weight:700; margin-bottom:12px;" data-i18n="results.timeline_title">Recommended Next Steps</h4>
+      <div class="timeline-wrap" id="nextStepsTimeline"></div>
+    </div>
+  </div>
+
+  <!-- WHAT-IF SIMULATOR -->
+  <div class="simulator-card">
+    <div class="sim-header">
+      <div>
+        <h3 style="font-size:1.3rem; font-weight:800; margin-bottom:4px;" data-i18n="results.whatif_title">Interactive What-If Simulator</h3>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin:0;" data-i18n="results.whatif_sub">
+          Adjust your lifestyle parameters below to see how changes directly impact your risk score in real time.
+        </p>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span id="simRiskDeltaBadge" class="sim-diff-badge neutral">Risk Change: 0 pts</span>
+        <button type="button" id="btnResetSim" class="btn-outline" style="padding:6px 14px; font-size:0.8rem;">Reset to Original</button>
+      </div>
+    </div>
+
+    <div class="sim-sliders-grid">
+      
+      <!-- Sim: Smoking -->
+      <div class="form-group">
+        <div class="form-label"><span>Active Smoking</span><strong id="simVal_Smoking">2</strong></div>
+        <input type="range" class="range-slider sim-slider" id="sim_Smoking" data-feature="Smoking" min="1" max="9" value="2">
       </div>
 
-      <!-- Download -->
-      <div class="res-card">
-        <div class="res-card-hdr">
-          <span class="res-card-ic">📄</span>
-          <span class="res-card-title">Report</span>
-        </div>
-        <div class="res-card-body">
-          <p style="font-size:.83rem;color:var(--muted);margin-bottom:16px;line-height:1.6">
-            Download a comprehensive PDF report with your complete risk assessment, clinical recommendations, and all warnings to share with your doctor.
-          </p>
-          <button class="btn-submit" style="width:100%;justify-content:center" onclick="downloadReport()">📄 Download PDF Report</button>
-          <div style="font-size:.7rem;color:var(--muted);text-align:center;margin-top:12px">
-            ⚠️ This report is for informational purposes only.<br>Consult a licensed physician for medical advice.
-          </div>
-        </div>
+      <!-- Sim: Passive Smoker -->
+      <div class="form-group">
+        <div class="form-label"><span>Second-Hand Smoke</span><strong id="simVal_Passive_Smoker">2</strong></div>
+        <input type="range" class="range-slider sim-slider" id="sim_Passive_Smoker" data-feature="Passive Smoker" min="1" max="9" value="2">
       </div>
 
-      <!-- Disclaimer -->
-      <div class="res-card" style="border-left:3px solid var(--warning)">
-        <div class="res-card-body">
-          <div style="font-size:.8rem;color:#92400e;line-height:1.65">
-            <strong>⚠️ Medical Disclaimer</strong><br>
-            LungCare AI is an educational screening tool. Results are based on a machine learning model and are not a clinical diagnosis. Always consult a qualified healthcare professional before making medical decisions.
-          </div>
-        </div>
+      <!-- Sim: Air Pollution -->
+      <div class="form-group">
+        <div class="form-label"><span>Air Pollution</span><strong id="simVal_Air_Pollution">3</strong></div>
+        <input type="range" class="range-slider sim-slider" id="sim_Air_Pollution" data-feature="Air Pollution" min="1" max="9" value="3">
+      </div>
+
+      <!-- Sim: Alcohol use -->
+      <div class="form-group">
+        <div class="form-label"><span>Alcohol Use</span><strong id="simVal_Alcohol_use">2</strong></div>
+        <input type="range" class="range-slider sim-slider" id="sim_Alcohol_use" data-feature="Alcohol use" min="1" max="9" value="2">
+      </div>
+
+      <!-- Sim: Balanced Diet -->
+      <div class="form-group">
+        <div class="form-label"><span>Diet Quality</span><strong id="simVal_Balanced_Diet">6</strong></div>
+        <input type="range" class="range-slider sim-slider" id="sim_Balanced_Diet" data-feature="Balanced Diet" min="1" max="9" value="6">
+      </div>
+
+      <!-- Sim: Obesity -->
+      <div class="form-group">
+        <div class="form-label"><span>Obesity / BMI</span><strong id="simVal_Obesity">2</strong></div>
+        <input type="range" class="range-slider sim-slider" id="sim_Obesity" data-feature="Obesity" min="1" max="9" value="2">
+      </div>
+
+      <!-- Sim: Dust Allergy -->
+      <div class="form-group">
+        <div class="form-label"><span>Dust Allergy</span><strong id="simVal_Dust_Allergy">2</strong></div>
+        <input type="range" class="range-slider sim-slider" id="sim_Dust_Allergy" data-feature="Dust Allergy" min="1" max="9" value="2">
+      </div>
+
+      <!-- Sim: Occupational Hazards -->
+      <div class="form-group">
+        <div class="form-label"><span>Workplace Hazards</span><strong id="simVal_OccuPational_Hazards">3</strong></div>
+        <input type="range" class="range-slider sim-slider" id="sim_OccuPational_Hazards" data-feature="OccuPational Hazards" min="1" max="9" value="3">
       </div>
 
     </div>
   </div>
+
+  <!-- ACTION BUTTONS BAR -->
+  <div class="results-actions-bar">
+    <a href="https://www.google.com/maps/search/pulmonologist+near+me" target="_blank" rel="noopener noreferrer" class="btn-primary" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%);" data-i18n="results.btn_doctor">
+      Find Nearby Pulmonologist 📍
+    </a>
+    <a href="{{ url_for('assessment') }}" class="btn-outline" data-i18n="results.btn_retake">
+      Retake Assessment 🔄
+    </a>
+    <a href="{{ url_for('report') }}" class="btn-outline">
+      Open Full Medical Report 📋
+    </a>
+  </div>
+
 </div>
-
-<script src="{{ url_for('static', filename='js/main.js') }}"></script>
-</body>
-</html>
+{% endblock %}

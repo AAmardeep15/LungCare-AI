@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}About — Architecture & Research Methodology — LungCare AI{% endblock %}
+
+{% block content %}
+<div class="section" style="max-width:1000px;">
+  
+  <div class="section-title" style="text-align:left; margin-bottom:36px;">
+    <h1 style="font-size:2.4rem; font-weight:800; color:var(--text); margin-bottom:10px;">About LungCare AI</h1>
+    <p style="margin:0; max-width:100%;">
+      A clinical-decision support system combining multi-algorithm soft-voting ensembles with SHAP local explainability for early thoracic risk screening.
+    </p>
+  </div>
+
+  <!-- Architecture Flow Card -->
+  <div class="feature-card" style="margin-bottom:30px; padding:32px;">
+    <h2 style="font-size:1.3rem; font-weight:800; margin-bottom:14px; color:var(--text);">System Pipeline Architecture</h2>
+    <p style="color:var(--text-muted); font-size:0.92rem; line-height:1.6; margin-bottom:20px;">
+      The application runs end-to-end inference without third-party cloud analytics, preserving privacy and enabling deterministic execution:
+    </p>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-top:20px;">
+      <div style="background:var(--surface-alt); border-radius:12px; padding:18px; border:1px solid var(--border);">
+        <div style="color:var(--primary); font-weight:800; font-size:1.2rem; margin-bottom:6px;">1. Intake Layer</div>
+        <div style="font-size:0.85rem; color:var(--text-muted);">23 clinical parameters collected via 3-step structured wizard with strict type & boundary verification.</div>
+      </div>
+
+      <div style="background:var(--surface-alt); border-radius:12px; padding:18px; border:1px solid var(--border);">
+        <div style="color:var(--primary); font-weight:800; font-size:1.2rem; margin-bottom:6px;">2. Preprocessing</div>
+        <div style="font-size:0.85rem; color:var(--text-muted);">Embedded SimpleImputer(median) and Winsorization range capping to eliminate data leakage.</div>
+      </div>
+
+      <div style="background:var(--surface-alt); border-radius:12px; padding:18px; border:1px solid var(--border);">
+        <div style="color:var(--primary); font-weight:800; font-size:1.2rem; margin-bottom:6px;">3. Ensemble Engine</div>
+        <div style="font-size:0.85rem; color:var(--text-muted);">Soft-voting classifier combining RF, XGBoost, LightGBM, Logistic Regression, and SVM.</div>
+      </div>
+
+      <div style="background:var(--surface-alt); border-radius:12px; padding:18px; border:1px solid var(--border);">
+        <div style="color:var(--primary); font-weight:800; font-size:1.2rem; margin-bottom:6px;">4. Explainability</div>
+        <div style="font-size:0.85rem; color:var(--text-muted);">SHAP TreeExplainer calculates marginal Shapley values for transparent factor ranking.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tech Stack Grid -->
+  <div class="feature-card" style="margin-bottom:30px; padding:32px;">
+    <h2 style="font-size:1.3rem; font-weight:800; margin-bottom:16px; color:var(--text);">Technology Stack</h2>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:18px;">
+      <div>
+        <div style="font-weight:700; color:var(--primary);">Backend Framework</div>
+        <div style="font-size:0.88rem; color:var(--text-muted);">Flask 3.0 (Python 3.14), Gunicorn-ready WSGI, python-dotenv environment isolation.</div>
+      </div>
+      <div>
+        <div style="font-weight:700; color:var(--primary);">Machine Learning</div>
+        <div style="font-size:0.88rem; color:var(--text-muted);">Scikit-learn 1.5, XGBoost 2.1, LightGBM 4.5, SHAP 0.46, Joblib model persistence.</div>
+      </div>
+      <div>
+        <div style="font-weight:700; color:var(--primary);">Interactive Visuals</div>
+        <div style="font-size:0.88rem; color:var(--text-muted);">Chart.js 4.4 (Canvas gauges, radars, donuts, bars), html2pdf.js document synthesizer.</div>
+      </div>
+      <div>
+        <div style="font-weight:700; color:var(--primary);">Design & Accessibility</div>
+        <div style="font-size:0.88rem; color:var(--text-muted);">Pure Semantic HTML5, CSS Variables (Dark/Light mode), Vanilla JS, Zero Node dependencies.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dataset Background & Limitations -->
+  <div class="feature-card" style="padding:32px; border-left:4px solid var(--risk-med);">
+    <h2 style="font-size:1.3rem; font-weight:800; margin-bottom:12px; color:var(--text);">Dataset Background & Clinical Notes</h2>
+    <p style="color:var(--text-muted); font-size:0.92rem; line-height:1.7;">
+      The prototype was developed using the benchmark <em>Cancer Patient Data Sets</em> (1,000 observations across 23 phenotypic, lifestyle, and symptom features). As documented in our <a href="{{ url_for('model_performance') }}" style="color:var(--primary); font-weight:700; text-decoration:underline;">Model Performance Audit</a>, this dataset exhibits high linear separability, resulting in 100% convergence across standard cross-validation splits. In real-world hospital environments, biological variance and measurement noise would yield lower empirical certainty.
+    </p>
+  </div>
+
+</div>
+{% endblock %}

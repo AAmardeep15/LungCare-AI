@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+
+{% block title %}Model Performance & Benchmark Audit — LungCare AI{% endblock %}
+
+{% block content %}
+<style>
+  .mp-hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: #fff;
+    padding: 3.5rem 2rem 2.5rem;
+    text-align: center;
+  }
+  .mp-hero h1 { font-size: 2.4rem; font-weight: 800; margin: 0 0 .5rem; }
+  .mp-hero p  { color: #94a3b8; font-size: 1.05rem; margin: 0; }
+  .mp-container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+  .disclaimer-card {
+    background: #fff7ed;
+    border-left: 5px solid #f97316;
+    border-radius: 10px;
+    padding: 1.1rem 1.4rem;
+    margin-bottom: 2rem;
+    color: #7c2d12;
+    font-size: .93rem;
+    line-height: 1.6;
+  }
+  .metric-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem; margin-bottom: 2.5rem; }
+  .metric-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    padding: 1.4rem 1.2rem;
+    text-align: center;
+  }
+  .metric-card .mc-label { font-size: .78rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .4rem; }
+  .metric-card .mc-value { font-size: 2.1rem; font-weight: 800; color: var(--primary); line-height: 1; }
+  .metric-card .mc-sub   { font-size: .78rem; color: var(--text-muted); margin-top: .3rem; }
+  .mp-section { margin-bottom: 2.8rem; }
+  .mp-section h2 {
+    font-size: 1.3rem; font-weight: 700; color: var(--text);
+    border-left: 4px solid var(--primary); padding-left: .75rem;
+    margin-bottom: 1.1rem;
+  }
+  .mp-table-wrap { overflow-x: auto; border-radius: 10px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); }
+  .mp-table { width: 100%; border-collapse: collapse; background: var(--surface); font-size: .87rem; }
+  .mp-table thead tr { background: #0f172a; color: #fff; }
+  .mp-table th { padding: .75rem 1rem; text-align: center; font-weight: 600; white-space: nowrap; }
+  .mp-table td { padding: .65rem 1rem; text-align: center; border-bottom: 1px solid var(--border-light); color: var(--text); }
+  .mp-table tbody tr:hover { background: var(--surface-alt); }
+  .mp-table td.name-col { text-align: left; font-weight: 600; }
+  .mp-table td.best { font-weight: 700; color: var(--primary); }
+  .plots-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.5rem; }
+  .plot-card {
+    background: var(--surface);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .plot-card img { width: 100%; height: auto; display: block; border-bottom: 1px solid var(--border-light); }
+  .plot-caption { padding: .75rem 1rem; font-size: .85rem; font-weight: 600; color: var(--text-muted); text-align: center; }
+  .limitations-list { list-style: disc; padding-left: 1.5rem; color: var(--text-muted); font-size: .92rem; line-height: 1.8; }
+</style>
+
+<!-- HERO -->
+<div class="mp-hero">
+  <h1>🧠 Model Performance Report</h1>
+  <p>Detailed evaluation of the LungCare AI ensemble and individual models</p>
+</div>
+
+<div class="mp-container">
+
+  <!-- 1. Disclaimer -->
+  <div class="disclaimer-card">
+    <strong>⚠️ Academic Disclaimer:</strong> This dataset is <strong>synthetic and near-separable</strong>.
+    Very high accuracy (&gt;95%) is expected and <strong>does not reflect real-world clinical performance</strong>.
+    These results are for academic / project purposes only and should not be used for clinical decision-making.
+  </div>
+
+  <!-- 2. Metric cards -->
+  <div class="metric-cards">
+    <div class="metric-card">
+      <div class="mc-label">Accuracy</div>
+      <div class="mc-value">{{ "%.1f"|format(metrics.ensemble_test.accuracy * 100) }}%</div>
+      <div class="mc-sub">Ensemble — test set</div>
+    </div>
+    <div class="metric-card">
+      <div class="mc-label">Macro F1</div>
+      <div class="mc-value">{{ "%.3f"|format(metrics.ensemble_test.f1_macro) }}</div>
+      <div class="mc-sub">Ensemble — test set</div>
+    </div>
+    <div class="metric-card">
+      <div class="mc-label">ROC-AUC</div>
+      <div class="mc-value">{{ "%.3f"|format(metrics.ensemble_test.roc_auc) }}</div>
+      <div class="mc-sub">OvR macro — test set</div>
+    </div>
+    <div class="metric-card">
+      <div class="mc-label">CV Accuracy</div>
+      <div class="mc-value">{{ "%.1f"|format(metrics.cv_5fold.accuracy_mean * 100) }}%</div>
+      <div class="mc-sub">5-fold ± {{ "%.3f"|format(metrics.cv_5fold.accuracy_std) }}</div>
+    </div>
+  </div>
+
+  <!-- 3. Model comparison table -->
+  <div class="mp-section">
+    <h2>📊 Model Comparison</h2>
+    <div class="mp-table-wrap">
+      <table class="mp-table">
+        <thead>
+          <tr>
+            <th style="text-align:left">Model</th>
+            <th>Accuracy</th>
+            <th>Precision</th>
+            <th>Recall</th>
+            <th>F1 (macro)</th>
+            <th>ROC-AUC</th>
+            <th>Train Acc</th>
+            <th>Train Time (s)</th>
+            <th>Infer (ms/sample)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for mname, m in metrics.individual_models.items() %}
+          <tr>
+            <td class="name-col">{{ mname | upper }}</td>
+            <td>{{ "%.4f"|format(m.accuracy) }}</td>
+            <td>{{ "%.4f"|format(m.precision_macro) }}</td>
+            <td>{{ "%.4f"|format(m.recall_macro) }}</td>
+            <td>{{ "%.4f"|format(m.f1_macro) }}</td>
+            <td>{{ "%.4f"|format(m.roc_auc) }}</td>
+            <td>{{ "%.4f"|format(m.train_accuracy) }}</td>
+            <td>{{ m.training_time_s if m.training_time_s is not none else "pre-trained" }}</td>
+            <td>{{ "%.4f"|format(m.inference_time_ms_per_sample) }}</td>
+          </tr>
+          {% endfor %}
+          <!-- Ensemble row -->
+          <tr style="background:var(--risk-low-bg); font-weight:600">
+            <td class="name-col" style="color:var(--primary)">ENSEMBLE ★</td>
+            <td class="best">{{ "%.4f"|format(metrics.ensemble_test.accuracy) }}</td>
+            <td class="best">{{ "%.4f"|format(metrics.ensemble_test.precision_macro) }}</td>
+            <td class="best">{{ "%.4f"|format(metrics.ensemble_test.recall_macro) }}</td>
+            <td class="best">{{ "%.4f"|format(metrics.ensemble_test.f1_macro) }}</td>
+            <td class="best">{{ "%.4f"|format(metrics.ensemble_test.roc_auc) }}</td>
+            <td>1.0000</td>
+            <td>—</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 4. Data Preprocessing & Robustness -->
+  <div class="mp-section">
+    <h2>🛡️ Data Preprocessing & Outlier Handling</h2>
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow-sm); padding:1.4rem 1.6rem; margin-bottom:1.5rem;">
+      <p style="color:var(--text); margin-top:0; font-size:.95rem; line-height:1.6;">
+        To ensure production stability, prevent data leakage, and handle custom/noisy external datasets, the training and inference workflows employ an integrated scikit-learn preprocessing pipeline:
+      </p>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:1.2rem; margin-top:1rem;">
+        <div style="background:var(--surface-alt); border:1px solid var(--border); border-radius:8px; padding:1rem;">
+          <div style="font-weight:700; color:var(--text); margin-bottom:.4rem;">🧩 Missing Value Imputation</div>
+          <div style="font-size:.85rem; color:var(--text-muted); line-height:1.5;">
+            <strong>Strategy:</strong> <code>SimpleImputer(strategy="median")</code><br>
+            <strong>Implementation:</strong> Integrated directly into each estimator pipeline. If incoming patient data or custom datasets have null values, they are imputed using median values computed strictly from the training split.
+          </div>
+        </div>
+        <div style="background:var(--surface-alt); border:1px solid var(--border); border-radius:8px; padding:1rem;">
+          <div style="font-weight:700; color:var(--text); margin-bottom:.4rem;">📈 Outlier & Range Handling</div>
+          <div style="font-size:.85rem; color:var(--text-muted); line-height:1.5;">
+            <strong>Strategy:</strong> 1.5×IQR Statistical Screening + Domain Capping<br>
+            <strong>Implementation:</strong> Likert symptom features (1–9) and Age (1–100) are bounded via Winsorization/clipping. Statistical IQR bounds are evaluated across all features to flag abnormal distributions.
+          </div>
+        </div>
+        <div style="background:var(--surface-alt); border:1px solid var(--border); border-radius:8px; padding:1rem;">
+          <div style="font-weight:700; color:var(--text); margin-bottom:.4rem;">🔒 Data Leakage Prevention</div>
+          <div style="font-size:.85rem; color:var(--text-muted); line-height:1.5;">
+            <strong>Strategy:</strong> Scikit-learn Pipeline Encapsulation<br>
+            <strong>Implementation:</strong> Imputation and standard scaling statistics are learned <em>only</em> on the training fold during cross-validation, strictly isolating holdout test splits.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Per-class classification report -->
+  <div class="mp-section">
+    <h2>📋 Per-Class Classification Report (Ensemble)</h2>
+    <div class="mp-table-wrap">
+      <table class="mp-table">
+        <thead>
+          <tr>
+            <th style="text-align:left">Class</th>
+            <th>Precision</th>
+            <th>Recall</th>
+            <th>F1-Score</th>
+            <th>Support</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cls in ["Low", "Medium", "High"] %}
+          {% if cls in metrics.class_report %}
+          <tr>
+            <td class="name-col">{{ cls }}</td>
+            <td>{{ "%.4f"|format(metrics.class_report[cls].precision) }}</td>
+            <td>{{ "%.4f"|format(metrics.class_report[cls].recall) }}</td>
+            <td>{{ "%.4f"|format(metrics.class_report[cls]["f1-score"]) }}</td>
+            <td>{{ metrics.class_report[cls].support | int }}</td>
+          </tr>
+          {% endif %}
+          {% endfor %}
+          <tr style="background:var(--surface-alt); font-weight:600">
+            <td class="name-col">Macro Avg</td>
+            <td>{{ "%.4f"|format(metrics.class_report["macro avg"].precision) }}</td>
+            <td>{{ "%.4f"|format(metrics.class_report["macro avg"].recall) }}</td>
+            <td>{{ "%.4f"|format(metrics.class_report["macro avg"]["f1-score"]) }}</td>
+            <td>{{ metrics.class_report["macro avg"].support | int }}</td>
+          </tr>
+          <tr style="font-weight:600">
+            <td class="name-col">Weighted Avg</td>
+            <td>{{ "%.4f"|format(metrics.class_report["weighted avg"].precision) }}</td>
+            <td>{{ "%.4f"|format(metrics.class_report["weighted avg"].recall) }}</td>
+            <td>{{ "%.4f"|format(metrics.class_report["weighted avg"]["f1-score"]) }}</td>
+            <td>{{ metrics.class_report["weighted avg"].support | int }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 6. Plot gallery -->
+  <div class="mp-section">
+    <h2>📈 Performance Plots</h2>
+    <div class="plots-grid">
+      <div class="plot-card">
+        <img src="/static/metrics/confusion_matrix.png" alt="Confusion Matrix" loading="lazy">
+        <div class="plot-caption">Ensemble Confusion Matrix (Counts)</div>
+      </div>
+      <div class="plot-card">
+        <img src="/static/metrics/confusion_matrix_norm.png" alt="Normalized Confusion Matrix" loading="lazy">
+        <div class="plot-caption">Ensemble Confusion Matrix (Normalized)</div>
+      </div>
+      <div class="plot-card">
+        <img src="/static/metrics/roc_curves.png" alt="ROC Curves" loading="lazy">
+        <div class="plot-caption">ROC Curves per Class (OvR)</div>
+      </div>
+      <div class="plot-card">
+        <img src="/static/metrics/model_comparison.png" alt="Model Comparison" loading="lazy">
+        <div class="plot-caption">Model Comparison: Accuracy &amp; Macro F1</div>
+      </div>
+      <div class="plot-card">
+        <img src="/static/metrics/feature_importance.png" alt="Feature Importance" loading="lazy">
+        <div class="plot-caption">Top 20 Features (Random Forest)</div>
+      </div>
+      <div class="plot-card">
+        <img src="/static/metrics/learning_curve.png" alt="Learning Curve" loading="lazy">
+        <div class="plot-caption">Learning Curve (Random Forest, 5-fold CV)</div>
+      </div>
+      <div class="plot-card">
+        <img src="/static/metrics/class_distribution.png" alt="Class Distribution" loading="lazy">
+        <div class="plot-caption">Target Class Distribution (1,000 samples)</div>
+      </div>
+      <div class="plot-card">
+        <img src="/static/metrics/correlation_heatmap.png" alt="Correlation Heatmap" loading="lazy">
+        <div class="plot-caption">Feature Correlation Heatmap</div>
+      </div>
+      <div class="plot-card">
+        <img src="/static/metrics/shap_summary.png" alt="SHAP Summary"
+             loading="lazy"
+             onerror="this.closest('.plot-card').style.display='none'">
+        <div class="plot-caption">SHAP Summary Plot (RF)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Limitations -->
+  <div class="mp-section">
+    <h2>⚠️ Academic Limitations</h2>
+    <ul class="limitations-list">
+      <li><strong>Synthetic dataset:</strong> The underlying data is synthetic / near-perfectly separable, causing artificially high metrics that do not generalise to real patients.</li>
+      <li><strong>No external validation:</strong> Results are from an internal 80/20 split and 5-fold CV only — no independent holdout or external cohort was used.</li>
+      <li><strong>Not FDA/CE cleared:</strong> This system has not undergone regulatory review and must not be used for clinical triage or diagnosis.</li>
+      <li><strong>Feature leakage risk:</strong> With near-separable synthetic data, some features may act as near-perfect proxies for the label, inflating test performance.</li>
+      <li><strong>Demographic generalisability:</strong> No real demographic diversity was validated; model behaviour on under-represented groups is unknown.</li>
+      <li><strong>Educational use only:</strong> This project is a proof-of-concept for academic demonstration purposes only.</li>
+    </ul>
+  </div>
+
+  <p style="color:var(--text-muted);font-size:.8rem;text-align:right">
+    Generated at: {{ metrics.generated_at }}
+  </p>
+
+</div>
+{% endblock %}

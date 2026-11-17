@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Assessment History & Trends — LungCare AI{% endblock %}
+
+{% block content %}
+<div class="history-container">
+  
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; flex-wrap:wrap; gap:16px;">
+    <div>
+      <h1 style="font-size:2.2rem; font-weight:800; color:var(--text); margin-bottom:6px;">Assessment History & Trends</h1>
+      <p style="color:var(--text-muted); font-size:0.95rem; margin:0;">
+        Track how your pulmonary risk score evolves across time. All records are stored privately in your browser.
+      </p>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <a href="{{ url_for('assessment') }}" class="btn-primary">+ New Assessment</a>
+      <button id="btnClearHistory" class="btn-outline" style="color:var(--risk-high); border-color:var(--risk-high);">Clear History</button>
+    </div>
+  </div>
+
+  <!-- Historical Trend Line Chart Card -->
+  <div class="chart-card" style="margin-bottom:30px; align-items:stretch; padding:24px;">
+    <div style="font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:4px;">Risk Score Trend Timeline</div>
+    <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:16px;">Visualizing calibrated risk scores (0-100) across past screenings</div>
+    <div style="height:260px; position:relative;">
+      <canvas id="historyTrendCanvas"></canvas>
+    </div>
+    <div id="noHistoryChartMsg" style="display:none; text-align:center; padding:40px; color:var(--text-muted);">
+      No history recorded yet. Complete an assessment to see your progress chart.
+    </div>
+  </div>
+
+  <!-- History Table Card -->
+  <div class="history-table-wrap">
+    <table class="history-table" id="historyTable">
+      <thead>
+        <tr>
+          <th>Date & Time</th>
+          <th>Age / Gender</th>
+          <th>Risk Tier</th>
+          <th>Risk Score</th>
+          <th>Confidence</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="historyTableBody">
+        <!-- Rendered via JS -->
+      </tbody>
+    </table>
+    <div id="noHistoryTableMsg" style="display:none; text-align:center; padding:40px; color:var(--text-muted); font-size:0.95rem;">
+      No prior assessments found in this browser. <a href="{{ url_for('assessment') }}" style="color:var(--primary); font-weight:600;">Take your first screening now →</a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  renderHistoryView();
+
+  const clearBtn = document.getElementById('btnClearHistory');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      if (confirm('Are you sure you want to clear your local assessment history?')) {
+        localStorage.removeItem('lungcare_history');
+        renderHistoryView();
+        if (window.showToast) window.showToast('Assessment history cleared.', 'success');
+      }
+    });
+  }
+});
+
+function renderHistoryView() {
+  const historyRaw = localStorage.getItem('lungcare_history');
+  const history = historyRaw ? JSON.parse(historyRaw) : [];
+
+  const tbody = document.getElementById('historyTableBody');
+  const table = document.getElementById('historyTable');
+  const noTableMsg = document.getElementById('noHistoryTableMsg');
+  const noChartMsg = document.getElementById('noHistoryChartMsg');
+  const canvas = document.getElementById('historyTrendCanvas');
+
+  if (!history || history.length === 0) {
+    if (table) table.style.display = 'none';
+    if (noTableMsg) noTableMsg.style.display = 'block';
+    if (canvas) canvas.style.display = 'none';
+    if (noChartMsg) noChartMsg.style.display = 'block';
+    return;
+  }
+
+  if (table) table.style.display = 'table';
+  if (noTableMsg) noTableMsg.style.display = 'none';
+  if (canvas) canvas.style.display = 'block';
+  if (noChartMsg) noChartMsg.style.display = 'none';
+
+  // Render rows (most recent first)
+  tbody.innerHTML = history.slice().reverse().map((item, idx) => {
+    const p = item.patient_data || {};
+    const genderStr = p.Gender == 1 ? 'Male' : (p.Gender == 2 ? 'Female' : '—');
+    const badgeColor = item.risk_level === 'Low' ? '#10b981' : (item.risk_level === 'Medium' ? '#f59e0b' : '#ef4444');
+    const badgeBg = item.risk_level === 'Low' ? '#ecfdf5' : (item.risk_level === 'Medium' ? '#fffbeb' : '#fef2f2');
+
+    return `<tr>
+      <td style="font-weight:600;">${item.timestamp || 'Recent'}</td>
+      <td>${p.Age || '—'} yrs (${genderStr})</td>
+      <td>
+        <span style="background:${badgeBg}; color:${badgeColor}; font-weight:800; padding:4px 10px; border-radius:9999px; font-size:0.8rem;">
+          ${item.risk_level} Risk
+        </span>
+      </td>
+      <td style="font-weight:800; font-size:1.05rem;">${item.risk_score}</td>
+      <td style="color:var(--text-muted);">${item.confidence || '--'}%</td>
+      <td>
+        <button onclick="loadHistoryItem(${history.length - 1 - idx})" class="btn-outline" style="padding:4px 10px; font-size:0.75rem;">
+          View Results ↗
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // Render Line Chart
+  const labels = history.map((h, i) => h.timestamp ? h.timestamp.split(' at ')[0] : `#${i+1}`);
+  const scores = history.map(h => h.risk_score);
+
+  const ctx = canvas.getContext('2d');
+  if (window.historyChartInstance) window.historyChartInstance.destroy();
+
+  window.historyChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Risk Score (0-100)',
+        data: scores,
+        borderColor: '#0d9488',
+        backgroundColor: 'rgba(13, 148, 136, 0.1)',
+        borderWidth: 3,
+        tension: 0.35,
+        fill: true,
+        pointBackgroundColor: '#0d9488',
+        pointRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          min: 0,
+          max: 100,
+          grid: { color: 'rgba(148, 163, 184, 0.15)' }
+        },
+        x: {
+          grid: { display: false }
+        }
+      },
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
+}
+
+function loadHistoryItem(index) {
+  const historyRaw = localStorage.getItem('lungcare_history');
+  if (!historyRaw) return;
+  const history = JSON.parse(historyRaw);
+  if (history[index]) {
+    sessionStorage.setItem('lungcare_assessment_result', JSON.stringify(history[index]));
+    window.location.href = "{{ url_for('results') }}";
+  }
+}
+</script>
+{% endblock %}

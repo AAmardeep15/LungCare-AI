@@ -1,0 +1,110 @@
+{
+  "ensemble_test": {
+    "accuracy": 1.0,
+    "f1_macro": 1.0,
+    "precision_macro": 1.0,
+    "recall_macro": 1.0,
+    "roc_auc": 1.0,
+    "risk_score_note": "Dataset is synthetic/near-separable. Very high metrics are expected and do not reflect real-world clinical performance."
+  },
+  "cv_5fold": {
+    "accuracy_mean": 1.0,
+    "accuracy_std": 0.0,
+    "f1_mean": 1.0,
+    "f1_std": 0.0
+  },
+  "individual_models": {
+    "rf": {
+      "accuracy": 1.0,
+      "precision_macro": 1.0,
+      "recall_macro": 1.0,
+      "f1_macro": 1.0,
+      "roc_auc": 1.0,
+      "train_accuracy": 1.0,
+      "training_time_s": 1.0474,
+      "inference_time_ms_per_sample": 0.441
+    },
+    "xgb": {
+      "accuracy": 1.0,
+      "precision_macro": 1.0,
+      "recall_macro": 1.0,
+      "f1_macro": 1.0,
+      "roc_auc": 1.0,
+      "train_accuracy": 1.0,
+      "training_time_s": 0.9191,
+      "inference_time_ms_per_sample": 0.0274
+    },
+    "lgb": {
+      "accuracy": 1.0,
+      "precision_macro": 1.0,
+      "recall_macro": 1.0,
+      "f1_macro": 1.0,
+      "roc_auc": 1.0,
+      "train_accuracy": 1.0,
+      "training_time_s": 2.3841,
+      "inference_time_ms_per_sample": 0.0347
+    },
+    "lr": {
+      "accuracy": 1.0,
+      "precision_macro": 1.0,
+      "recall_macro": 1.0,
+      "f1_macro": 1.0,
+      "roc_auc": 1.0,
+      "train_accuracy": 1.0,
+      "training_time_s": 0.0376,
+      "inference_time_ms_per_sample": 0.0139
+    },
+    "svm": {
+      "accuracy": 1.0,
+      "precision_macro": 1.0,
+      "recall_macro": 1.0,
+      "f1_macro": 1.0,
+      "roc_auc": 1.0,
+      "train_accuracy": 1.0,
+      "training_time_s": 0.0665,
+      "inference_time_ms_per_sample": 0.0285
+    }
+  },
+  "class_report": {
+    "Low": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 61.0
+    },
+    "Medium": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 66.0
+    },
+    "High": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 73.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 200.0
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 200.0
+    }
+  },
+  "data_preprocessing": {
+    "missing_value_strategy": "SimpleImputer(strategy='median')",
+    "missing_values_detected": 0,
+    "outlier_detection_method": "Interquartile Range (1.5 x IQR Rule)",
+    "outlier_capping_method": "Domain-aware Winsorization & Likert range clipping [1, 9]",
+    "features_with_iqr_outliers": 1,
+    "pipeline_isolation": "Embedded inside sklearn Pipelines to prevent train/test data leakage"
+  },
+  "generated_at": "2026-11-17T13:26:16.525813+00:00"
+}

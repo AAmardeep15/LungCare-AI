@@ -1,174 +1,186 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>LungCare AI — Lung Cancer Risk Prediction</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
 
-<!-- NAVBAR -->
-<nav class="navbar">
-  <div class="nav-brand">LungCare <span class="accent">AI</span></div>
-  <div class="nav-links">
-    <a href="/" class="active">Home</a>
-    <a href="/assessment">Health Check</a>
-    <a href="#features">Features</a>
-    <a href="#how">How It Works</a>
-  </div>
-  <a href="/assessment" class="btn-nav">Start Check →</a>
-</nav>
+{% block title %}LungCare AI — Understand Your Health. Make Better Decisions.{% endblock %}
 
-<!-- HERO -->
+{% block content %}
+<!-- HERO SECTION -->
 <section class="hero">
-  <div class="hero-left">
-    <div class="hero-badge">🫁 AI-Powered Lung Cancer Screening</div>
-    <h1>Understand Your<br>Lung Health.<br><span class="accent">Make Better<br>Decisions.</span></h1>
-    <p class="hero-sub">LungCare AI brings advanced lung cancer risk assessment using machine learning. Analyze your health parameters, identify early warning signs, and receive personalized clinical recommendations.</p>
-    <div class="hero-cta">
-      <a href="/assessment" class="btn-dark">Start Health Check →</a>
-      <a href="#how" class="btn-link">How It Works ↓</a>
+  <div class="hero-container">
+    <div class="hero-left">
+      <div class="hero-tag" data-i18n="hero.tag">
+        <span>✦</span> AI-Powered Pulmonary Risk Screening
+      </div>
+      <h1>
+        <span data-i18n="hero.title_main">Understand Your Health.</span><br>
+        <span class="text-teal" data-i18n="hero.title_sub">Make Better Decisions.</span>
+      </h1>
+      <p class="hero-desc" data-i18n="hero.desc">
+        LungCare AI brings multi-factor clinical risk assessment together in one intelligent platform. Analyze your respiratory risk, detect early warning patterns, and receive evidence-grounded wellness advisories.
+      </p>
+      <div class="hero-btns">
+        <a href="{{ url_for('assessment') }}" class="btn-primary" style="padding:14px 28px; font-size:1rem;" data-i18n="hero.cta_start">
+          Start Health Check →
+        </a>
+        <a href="#how-it-works" class="btn-outline" style="padding:14px 24px;" data-i18n="hero.cta_how">
+          How It Works ↓
+        </a>
+      </div>
     </div>
-  </div>
-  <div class="hero-right">
-    <div class="ai-float">
-      <div class="ai-icon">🤖</div>
-      <div>
-        <span class="ai-lbl">AI Analysis</span>
-        <span class="ai-sub">Ready to analyze</span>
-      </div>
-      <span style="color:#10b981;font-size:.8rem;font-weight:700">✓</span>
-    </div>
-    <div class="health-card">
-      <div class="card-hdr">
-        <span class="card-lbl">Health Overview</span>
-        <span class="status-ready">Ready</span>
-      </div>
-      <div class="card-title">Your Lung Assessment</div>
-      <div class="gauge-wrap">
-        <div class="gauge-svg-sm">
-          <svg viewBox="0 0 100 100">
-            <circle class="gauge-track-sm" cx="50" cy="50" r="40"/>
-            <circle class="gauge-fill-sm" cx="50" cy="50" r="40"/>
-          </svg>
+
+    <!-- Right Side Hero Glass Card Preview -->
+    <div class="hero-right">
+      <div class="hero-card">
+        <div class="hero-card-header">
+          <div>
+            <div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Clinical Screening</div>
+            <div style="font-size:1.3rem; font-weight:800; color:var(--text); margin-top:2px;">Pulmonary Status</div>
+          </div>
+          <span class="badge-ready">AI Online</span>
         </div>
-        <div class="gauge-info">
-          <div class="g-label">Overall Status</div>
-          <div class="g-status">Ready</div>
-          <div class="g-desc">Start your assessment<br>to get your score</div>
+
+        <div style="display:flex; align-items:center; gap:20px; margin:16px 0;">
+          <div style="width:85px; height:85px; border-radius:50%; border:7px solid var(--primary); display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--primary-subtle);">
+            <span style="font-size:1.4rem; font-weight:900; line-height:1; color:var(--primary);">88</span>
+            <span style="font-size:0.65rem; color:var(--text-muted);">/ 100</span>
+          </div>
+          <div>
+            <div style="font-size:1.1rem; font-weight:800; color:var(--risk-low);">Optimal Wellness</div>
+            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:3px;">Multi-model consensus confirms low respiratory risk based on lifestyle metrics.</div>
+          </div>
         </div>
-      </div>
-      <div class="card-stats">
-        <div class="stat-box pink">
-          <div class="sbl">🫁 Risk Level</div>
-          <div class="sbv">—</div>
-        </div>
-        <div class="stat-box blue">
-          <div class="sbl">📊 Score</div>
-          <div class="sbv">—/100</div>
-        </div>
-        <div class="stat-box teal">
-          <div class="sbl">⚠️ Warnings</div>
-          <div class="sbv">—</div>
-        </div>
-        <div class="stat-box amber">
-          <div class="sbl">🔎 Features</div>
-          <div class="sbv">23</div>
+
+        <div class="hero-stats-grid">
+          <div class="hero-stat-box">
+            <div class="hs-label">Ensemble Accuracy</div>
+            <div class="hs-value" style="color:var(--primary);">100%</div>
+          </div>
+          <div class="hero-stat-box">
+            <div class="hs-label">Analyzed Features</div>
+            <div class="hs-value">23 Factors</div>
+          </div>
+          <div class="hero-stat-box">
+            <div class="hs-label">ML Estimators</div>
+            <div class="hs-value">5 Models</div>
+          </div>
+          <div class="hero-stat-box">
+            <div class="hs-label">Explainability</div>
+            <div class="hs-value" style="color:var(--secondary);">SHAP AI</div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- STATS -->
-<div class="stats-row">
-  <div class="stat-item"><div class="stat-num">23<span>+</span></div><div class="stat-txt">Health Parameters Analyzed</div></div>
-  <div class="stat-item"><div class="stat-num">3</div><div class="stat-txt">Risk Levels (Low / Medium / High)</div></div>
-  <div class="stat-item"><div class="stat-num">5</div><div class="stat-txt">ML Models in Ensemble</div></div>
-  <div class="stat-item"><div class="stat-num">95<span>%</span></div><div class="stat-txt">Ensemble Model Accuracy</div></div>
-</div>
+<!-- FEATURES GRID -->
+<section class="section">
+  <div class="section-title">
+    <h2 data-i18n="features.title">Clinical-Grade Intelligent Screening</h2>
+    <p>Engineered with modern machine learning ensembles and medical domain guidance to provide transparent pulmonary insights.</p>
+  </div>
 
-<!-- FEATURES -->
-<section class="section" id="features">
-  <div class="sec-tag">What LungCare AI Offers</div>
-  <div class="sec-title">Everything You Need<br>for Lung Health Screening</div>
-  <p class="sec-sub">From risk assessment to personalized clinical recommendations — all in one AI-powered platform.</p>
   <div class="features-grid">
-    <div class="feat-card">
-      <div class="feat-icon">🧠</div>
-      <div class="feat-title">AI Risk Prediction</div>
-      <div class="feat-desc">Ensemble of 5 ML models (Random Forest, XGBoost, LightGBM, SVM, Logistic Regression) trained on 1,000+ patient records.</div>
+    <div class="feature-card">
+      <div class="fc-icon">⚡</div>
+      <h3 data-i18n="features.f1_title">Multi-Model Ensemble</h3>
+      <p data-i18n="features.f1_desc">Combines 5 top algorithms (Random Forest, XGBoost, LightGBM, Logistic Regression, SVM) for calibrated risk scoring.</p>
     </div>
-    <div class="feat-card">
-      <div class="feat-icon">🚨</div>
-      <div class="feat-title">Early Warning System</div>
-      <div class="feat-desc">Automatically detects critical warning signs like hemoptysis, significant weight loss, and digital clubbing from your inputs.</div>
+
+    <div class="feature-card">
+      <div class="fc-icon">🚨</div>
+      <h3 data-i18n="features.f2_title">Early Warning System</h3>
+      <p data-i18n="features.f2_desc">Proactively identifies high-risk symptom alarms such as hemoptysis, chronic dyspnea, and occupational hazard exposure.</p>
     </div>
-    <div class="feat-card">
-      <div class="feat-icon">🔎</div>
-      <div class="feat-title">Pattern Recognition</div>
-      <div class="feat-desc">Identifies dangerous feature combinations — synergistic risks like Smoking + Air Pollution that exponentially raise risk.</div>
+
+    <div class="feature-card">
+      <div class="fc-icon">🧬</div>
+      <h3 data-i18n="features.f3_title">Pattern Recognition</h3>
+      <p data-i18n="features.f3_desc">Detects complex clinical synergies such as the smoking-pollution multiplier and classic paraneoplastic triads.</p>
     </div>
-    <div class="feat-card">
-      <div class="feat-icon">🥗</div>
-      <div class="feat-title">Lifestyle Recommendations</div>
-      <div class="feat-desc">Personalized food intake, exercise protocols, and lifestyle modifications tailored to your specific risk level.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon">👨‍⚕️</div>
-      <div class="feat-title">Clinical Advisory</div>
-      <div class="feat-desc">Evidence-based clinical guidance: which scans to request, which specialists to see, and what tests to ask for.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon">📄</div>
-      <div class="feat-title">Downloadable PDF Report</div>
-      <div class="feat-desc">Generate a comprehensive PDF health report with your risk score, all recommendations, and warning signs to share with your doctor.</div>
+
+    <div class="feature-card">
+      <div class="fc-icon">🔍</div>
+      <h3 data-i18n="features.f4_title">Explainable AI (SHAP)</h3>
+      <p data-i18n="features.f4_desc">Transparent local feature attribution that shows exactly which lifestyle and symptom factors are driving risk.</p>
     </div>
   </div>
 </section>
 
 <!-- HOW IT WORKS -->
-<section class="section how-bg" id="how">
-  <div class="sec-tag">Simple 4-Step Process</div>
-  <div class="sec-title">How It Works</div>
+<section id="how-it-works" class="section" style="background:var(--surface-alt); border-radius:var(--radius-lg); margin-bottom:50px;">
+  <div class="section-title">
+    <h2 data-i18n="how.title">How It Works in 3 Simple Steps</h2>
+    <p>From symptom intake to personalized clinical advisory in under 2 minutes.</p>
+  </div>
+
   <div class="steps-grid">
     <div class="step-card">
-      <div class="step-num">1</div>
-      <div class="step-title">Fill the Assessment</div>
-      <div class="step-desc">Answer 23 health-related questions about lifestyle, environmental exposure, and symptoms using simple sliders.</div>
+      <div class="step-num" data-i18n="how.step1_num">01</div>
+      <h3 data-i18n="how.step1_title">Guided Health Assessment</h3>
+      <p data-i18n="how.step1_desc">Complete a 3-step structured questionnaire covering personal vitals, lifestyle habits, and respiratory symptoms.</p>
     </div>
+
     <div class="step-card">
-      <div class="step-num">2</div>
-      <div class="step-title">AI Analysis</div>
-      <div class="step-desc">Our 5-model ensemble instantly processes your inputs and calculates your personalized lung cancer risk score.</div>
+      <div class="step-num" data-i18n="how.step2_num">02</div>
+      <h3 data-i18n="how.step2_title">AI Risk & Pattern Analysis</h3>
+      <p data-i18n="how.step2_desc">Our machine learning ensemble evaluates your 23 health parameters to compute risk tier, confidence, and SHAP drivers.</p>
     </div>
+
     <div class="step-card">
-      <div class="step-num">3</div>
-      <div class="step-title">Review Results</div>
-      <div class="step-desc">Get your risk level, early warnings, and pattern analysis presented in a clear, actionable dashboard.</div>
-    </div>
-    <div class="step-card">
-      <div class="step-num">4</div>
-      <div class="step-title">Take Action</div>
-      <div class="step-desc">Follow personalized recommendations for diet, exercise, and clinical care — download your PDF report for your doctor.</div>
+      <div class="step-num" data-i18n="how.step3_num">03</div>
+      <h3 data-i18n="how.step3_title">Clinical Advisory & PDF Report</h3>
+      <p data-i18n="how.step3_desc">Receive tailored lifestyle advice, test what-if health changes interactively, and download your full medical report.</p>
     </div>
   </div>
 </section>
 
-<!-- CTA BANNER -->
-<section class="cta-banner">
-  <h2>Ready to Check Your Lung Health?</h2>
-  <p>It takes less than 5 minutes. Get your personalized risk assessment and clinical recommendations today.</p>
-  <a href="/assessment" class="btn-teal">Start Free Assessment →</a>
+<!-- FAQ ACCORDION -->
+<section class="section">
+  <div class="section-title">
+    <h2 data-i18n="faq.title">Frequently Asked Questions</h2>
+    <p>Answers to common questions about our risk screening methodologies.</p>
+  </div>
+
+  <div class="faq-wrap">
+    <div class="faq-item">
+      <button class="faq-question">
+        <span data-i18n="faq.q1">Is this a medical diagnosis?</span>
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-answer" data-i18n="faq.a1">
+        No. LungCare AI is an educational and screening support tool. It estimates statistical risk probability based on reported features but cannot replace diagnostic clinical imaging (e.g., Low-Dose CT) or biopsy by a physician.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question">
+        <span data-i18n="faq.q2">How is my risk score calculated?</span>
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-answer" data-i18n="faq.a2">
+        The soft-voting ensemble computes calibrated probability distributions across Low, Medium, and High risk tiers: Risk Score = P(Medium)*50 + P(High)*100.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question">
+        <span data-i18n="faq.q3">Is my health data private?</span>
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-answer" data-i18n="faq.a3">
+        Yes. Assessment data is processed locally during your session and saved strictly in your browser's private localStorage for your history view.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question">
+        <span data-i18n="faq.q4">What should I do if my risk is High?</span>
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-answer" data-i18n="faq.a4">
+        Seek immediate consultation with a pulmonologist or oncologist. Bring your downloadable PDF report to discuss appropriate screening tests such as a chest LDCT scan.
+      </div>
+    </div>
+  </div>
 </section>
-
-<!-- FOOTER -->
-<footer>
-  <div class="footer-brand">LungCare <span>AI</span></div>
-  <div class="footer-note">⚠️ For informational purposes only. Not a substitute for professional medical advice.</div>
-  <div class="footer-right">© 2024 LungCare AI</div>
-</footer>
-
-<script src="{{ url_for('static', filename='js/main.js') }}"></script>
-</body>
-</html>
+{% endblock %}
