@@ -1197,35 +1197,143 @@ button, input, select, textarea { font-family: inherit; }
   margin-bottom: 26px;
   overflow: hidden;
 }
-.tabs-nav {
+.tabs-header-bar {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.tabs-nav, .tab-nav {
   display: flex;
   background: var(--surface-alt);
   border-bottom: 1px solid var(--border);
   overflow-x: auto;
+  gap: 6px;
+  padding: 6px 16px 0;
 }
 .tab-btn {
-  padding: 13px 20px;
-  background: none;
+  padding: 12px 20px;
+  background: transparent;
   border: none;
   font-size: 0.88rem;
   font-weight: 700;
   color: var(--text-muted);
   cursor: pointer;
   white-space: nowrap;
-  border-bottom: 2.5px solid transparent;
+  border-bottom: 3px solid transparent;
   transition: var(--transition);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
 }
-.tab-btn:hover { color: var(--primary); }
+.tab-btn:hover {
+  color: var(--primary);
+  background: rgba(13, 148, 136, 0.08);
+}
 .tab-btn.active {
   color: var(--primary);
   border-color: var(--primary);
   background: var(--surface);
+  box-shadow: 0 -2px 6px rgba(0,0,0,0.04);
 }
-.tab-panel {
-  display: none;
+
+/* Tab panes: ALWAYS hide unless explicitly active */
+.tab-content {
+  position: relative;
+  min-height: 180px;
+}
+.tab-pane, .tab-panel {
+  display: none !important;
   padding: 24px;
 }
-.tab-panel.active { display: block; animation: fadeIn 0.25s ease; }
+.tab-pane.active, .tab-panel.active {
+  display: block !important;
+  animation: fadeIn 0.25s ease;
+}
+
+/* Recommendations List & Items */
+.recs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.recs-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 18px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.92rem;
+  color: var(--text);
+  line-height: 1.55;
+  transition: var(--transition);
+}
+.recs-item:hover {
+  border-color: var(--primary);
+  transform: translateX(3px);
+}
+.recs-bullet {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary-subtle);
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Specific styling for 'Factors to Avoid' tab items */
+#tabAvoid .recs-bullet {
+  background: var(--risk-high-bg);
+  color: var(--risk-high);
+}
+#tabAvoid .recs-item {
+  border-left: 3px solid var(--risk-high);
+}
+#tabAvoid .recs-item:hover {
+  border-color: var(--risk-high);
+}
+
+/* Doctor consultation box styling */
+#recsDoctor {
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.7;
+  background: var(--surface-alt);
+  padding: 20px;
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--primary);
+}
+
+/* Recommendations Timeline Box */
+.recs-timeline-box {
+  margin: 0 24px 24px;
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+}
+.timeline-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.timeline-step {
+  padding: 12px 16px;
+  background: var(--surface-alt);
+  border-left: 3px solid var(--secondary);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.timeline-step strong {
+  color: var(--secondary);
+  font-weight: 700;
+}
 
 /* Timeline Next Steps */
 .timeline {

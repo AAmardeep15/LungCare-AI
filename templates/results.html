@@ -120,14 +120,17 @@
 
   <!-- RECOMMENDATIONS TABS -->
   <div class="tabs-wrap">
-    <h3 style="font-size:1.25rem; font-weight:800; margin-bottom:16px;">Personalized Recommendations</h3>
+    <div class="tabs-header-bar">
+      <h3 style="font-size:1.25rem; font-weight:800; margin:0;">Personalized Recommendations</h3>
+      <p style="font-size:0.85rem; color:var(--text-muted); margin:4px 0 0 0;">Click any category below to view tailored guidance and lifestyle recommendations.</p>
+    </div>
     
-    <div class="tab-nav">
-      <button class="tab-btn active" data-tab="tabClinical">Clinical & Tests</button>
-      <button class="tab-btn" data-tab="tabAvoid">Factors to Avoid</button>
-      <button class="tab-btn" data-tab="tabExercise">Breathing & Activity</button>
-      <button class="tab-btn" data-tab="tabFood">Nutrition & Diet</button>
-      <button class="tab-btn" data-tab="tabDoctor">Doctor Consultation</button>
+    <div class="tabs-nav">
+      <button type="button" class="tab-btn active" data-tab="tabClinical">Clinical & Tests</button>
+      <button type="button" class="tab-btn" data-tab="tabAvoid">Factors to Avoid</button>
+      <button type="button" class="tab-btn" data-tab="tabExercise">Breathing & Activity</button>
+      <button type="button" class="tab-btn" data-tab="tabFood">Nutrition & Diet</button>
+      <button type="button" class="tab-btn" data-tab="tabDoctor">Doctor Consultation</button>
     </div>
 
     <div class="tab-content">
@@ -144,12 +147,12 @@
         <div class="recs-list" id="recsFood"></div>
       </div>
       <div class="tab-pane" id="tabDoctor">
-        <div id="recsDoctor" style="font-size:0.95rem; color:var(--text); line-height:1.7; background:var(--surface-alt); padding:16px; border-radius:var(--radius-md); border-left:4px solid var(--primary);"></div>
+        <div id="recsDoctor"></div>
       </div>
     </div>
 
     <!-- Recommended Next Steps Timeline -->
-    <div style="margin-top:28px; border-top:1px solid var(--border); padding-top:20px;">
+    <div class="recs-timeline-box">
       <h4 style="font-size:1rem; font-weight:700; margin-bottom:12px;">Recommended Next Steps</h4>
       <div class="timeline-wrap" id="nextStepsTimeline"></div>
     </div>

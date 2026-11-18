@@ -457,28 +457,53 @@ function populateRecList(containerId, items) {
   const el = document.getElementById(containerId);
   if (!el) return;
   if (!items || items.length === 0) {
-    el.innerHTML = '<div style="color:var(--text-muted);">No specific guidance in this category.</div>';
+    el.innerHTML = '<div style="color:var(--text-muted); padding:16px;">No specific guidance in this category.</div>';
     return;
   }
+  const isAvoid = containerId === 'recsAvoid';
+  const bullet = isAvoid ? '⚠️' : '✓';
   el.innerHTML = items.map(item => `
-    <div class="recs-item">
-      <span class="recs-bullet">✓</span>
+    <div class="recs-item ${isAvoid ? 'avoid-item' : ''}">
+      <span class="recs-bullet">${bullet}</span>
       <span>${item}</span>
     </div>
   `).join('');
 }
 
 function initTabs() {
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  const buttons = document.querySelectorAll('.tab-btn');
+  const panes = document.querySelectorAll('.tab-pane, .tab-panel');
+  if (!buttons.length) return;
 
+  buttons.forEach(btn => {
+    btn.onclick = (e) => {
+      e.preventDefault();
+      const targetId = btn.getAttribute('data-tab');
+      if (!targetId) return;
+
+      // 1. Deactivate all buttons & panes
+      buttons.forEach(b => b.classList.remove('active'));
+      panes.forEach(p => p.classList.remove('active'));
+
+      // 2. Activate clicked button
       btn.classList.add('active');
-      const target = document.getElementById(btn.getAttribute('data-tab'));
-      if (target) target.classList.add('active');
-    });
+
+      // 3. Activate target pane
+      const targetPane = document.getElementById(targetId);
+      if (targetPane) {
+        targetPane.classList.add('active');
+      }
+    };
   });
+
+  // Ensure initial active tab state is consistent
+  const activeBtn = document.querySelector('.tab-btn.active') || buttons[0];
+  if (activeBtn) {
+    const targetId = activeBtn.getAttribute('data-tab');
+    panes.forEach(p => p.classList.remove('active'));
+    const targetPane = document.getElementById(targetId);
+    if (targetPane) targetPane.classList.add('active');
+  }
 }
 
 // ── 8. CHART.JS VISUALIZATIONS ───────────────────────────────────────────────
