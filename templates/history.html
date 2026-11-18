@@ -121,6 +121,7 @@ function renderHistoryView() {
   }).join('');
 
   // Render Line Chart
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   const labels = history.map((h, i) => h.timestamp ? h.timestamp.split(' at ')[0] : `#${i+1}`);
   const scores = history.map(h => h.risk_score);
 
@@ -150,10 +151,19 @@ function renderHistoryView() {
         y: {
           min: 0,
           max: 100,
-          grid: { color: 'rgba(148, 163, 184, 0.15)' }
+          grid: { color: isDark ? 'rgba(148, 163, 184, 0.2)' : 'rgba(15, 23, 42, 0.1)' },
+          ticks: {
+            color: isDark ? '#cbd5e1' : '#090e17',
+            font: { size: 11, weight: '700' },
+            callback: (v) => `${v} pts`
+          }
         },
         x: {
-          grid: { display: false }
+          grid: { display: false },
+          ticks: {
+            color: isDark ? '#cbd5e1' : '#090e17',
+            font: { size: 11, weight: '600' }
+          }
         }
       },
       plugins: {

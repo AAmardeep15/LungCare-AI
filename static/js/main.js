@@ -1,11 +1,9 @@
 /**
  * LungCare AI - Client-side Controller
- * Features: Dark/Light Mode, English/Hindi i18n, Assessment Wizard,
+ * Features: Dark/Light Mode, Assessment Wizard,
  * Chart.js Visualizations (Gauge, Donut, Radar, SHAP), What-If Simulator, History, PDF
  */
 
-let currentLang = localStorage.getItem('lungcare_lang') || 'en';
-let i18nData = {};
 let simDebounceTimer = null;
 let gaugeChart = null;
 let donutChart = null;
@@ -16,11 +14,11 @@ let currentResult = null;
 // ── 1. GLOBAL INITIALIZATION ─────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
-  initI18n();
   initToast();
   initFAQ();
   initWizard();
   initResults();
+  initChatbot();
 });
 
 // ── 2. THEME CONTROLLER ──────────────────────────────────────────────────────
@@ -52,45 +50,6 @@ function updateChartThemes() {
   if (currentResult) {
     renderCharts(currentResult);
   }
-}
-
-// ── 3. I18N CONTROLLER (ENGLISH / HINDI) ────────────────────────────────────
-async function initI18n() {
-  await loadTranslations(currentLang);
-  const btn = document.getElementById('langToggleBtn');
-  if (btn) {
-    btn.addEventListener('click', async () => {
-      currentLang = currentLang === 'en' ? 'hi' : 'en';
-      localStorage.setItem('lungcare_lang', currentLang);
-      await loadTranslations(currentLang);
-    });
-  }
-}
-
-async function loadTranslations(lang) {
-  try {
-    const res = await fetch(`/static/i18n/${lang}.json`);
-    if (res.ok) {
-      i18nData = await res.json();
-      applyTranslations(i18nData);
-      const label = document.getElementById('currentLangLabel');
-      if (label) label.textContent = lang === 'en' ? 'HI' : 'EN';
-    }
-  } catch (e) {
-    console.warn('i18n load error:', e);
-  }
-}
-
-function applyTranslations(dict) {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    const val = getNestedValue(dict, key);
-    if (val) el.textContent = val;
-  });
-}
-
-function getNestedValue(obj, keyPath) {
-  return keyPath.split('.').reduce((acc, part) => acc && acc[part], obj);
 }
 
 // ── 4. TOAST NOTIFICATIONS ───────────────────────────────────────────────────
@@ -339,19 +298,63 @@ function initResults() {
   initTabs();
   initWhatIfSimulator(currentResult);
 
-  // PDF Export
+  // High-Contrast PDF Export (100% Dark-Mode Proof)
   const btnPDF = document.getElementById('btnExportPDF');
   if (btnPDF) {
     btnPDF.addEventListener('click', () => {
       const el = document.getElementById('printableReport');
+      if (!el) return;
+      if (window.showToast) window.showToast('Generating clinical assessment PDF...', 'info');
+
       const opt = {
-        margin: 10,
-        filename: `LungCare-Report-${new Date().toISOString().slice(0, 10)}.pdf`,
+        margin: [8, 8, 8, 8],
+        filename: `LungCare-Clinical-Assessment-${new Date().toISOString().slice(0, 10)}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff',
+          onclone: (clonedDoc) => {
+            clonedDoc.documentElement.setAttribute('data-theme', 'light');
+            const target = clonedDoc.getElementById('printableReport');
+            if (target) {
+              target.style.backgroundColor = '#ffffff';
+              target.style.color = '#0f172a';
+
+              // Ensure all cards render with crisp border on white background
+              target.querySelectorAll('.card, .gauge-card, .chart-card, .alarm-card, .tabs-wrap, .simulator-card').forEach(c => {
+                c.style.backgroundColor = '#ffffff';
+                c.style.borderColor = '#cbd5e1';
+                c.style.color = '#0f172a';
+                c.style.boxShadow = 'none';
+              });
+
+              // Force dark text on all textual elements except colored badges
+              target.querySelectorAll('h1, h2, h3, h4, p, span, div, strong, small').forEach(txt => {
+                if (!txt.classList.contains('gauge-level-badge') &&
+                    !txt.classList.contains('compact-risk-badge') &&
+                    !txt.classList.contains('delta-badge') &&
+                    !txt.classList.contains('btn-primary') &&
+                    !txt.classList.contains('btn-outline')) {
+                  txt.style.color = '#0f172a';
+                }
+              });
+
+              // Hide interactive web-only buttons from the PDF document
+              target.querySelectorAll('.results-actions-bar, #btnSaveHistory, #btnExportPDF, .tabs-nav, .simulator-header button, .btn-sample').forEach(hideEl => {
+                hideEl.style.display = 'none';
+              });
+            }
+          }
+        },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
-      html2pdf().set(opt).from(el).save();
+      html2pdf().set(opt).from(el).save().then(() => {
+        if (window.showToast) window.showToast('PDF downloaded successfully.', 'success');
+      }).catch(err => {
+        console.error('PDF generation error:', err);
+        if (window.showToast) window.showToast('Error generating PDF. Please use browser print.', 'error');
+      });
     });
   }
 
@@ -580,8 +583,8 @@ function renderRadar(p) {
           ticks: { stepSize: 2, display: false },
           grid: { color: 'rgba(148, 163, 184, 0.2)' },
           pointLabels: {
-            font: { size: 11, weight: '600' },
-            color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#cbd5e1' : '#475569'
+            font: { size: 12, weight: '700' },
+            color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#f8fafc' : '#090e17'
           }
         }
       },
@@ -598,6 +601,7 @@ function renderShapBars(topFactors) {
   const ctx = canvas.getContext('2d');
   if (shapChart) shapChart.destroy();
 
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   const raising = topFactors.raising || [];
   const lowering = topFactors.lowering || [];
 
@@ -636,16 +640,18 @@ function renderShapBars(topFactors) {
       maintainAspectRatio: false,
       scales: {
         x: {
-          grid: { color: 'rgba(148, 163, 184, 0.15)' },
+          grid: { color: isDark ? 'rgba(148, 163, 184, 0.2)' : 'rgba(15, 23, 42, 0.1)' },
           ticks: {
-            callback: (v) => `${v}%`
+            callback: (v) => `${v}%`,
+            font: { size: 11, weight: '600' },
+            color: isDark ? '#cbd5e1' : '#090e17'
           }
         },
         y: {
           grid: { display: false },
           ticks: {
-            font: { size: 10, weight: '600' },
-            color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#cbd5e1' : '#334155'
+            font: { size: 11, weight: '700' },
+            color: isDark ? '#f8fafc' : '#090e17'
           }
         }
       },
@@ -767,4 +773,249 @@ function updateSimResults(data, originalScore) {
       deltaBadge.textContent = 'Risk Change: 0 pts';
     }
   }
+}
+
+// ── 10. CHATBOT WIDGET CONTROLLER ───────────────────────────────────────────
+function initChatbot() {
+  const toggleBtn = document.getElementById('chatToggleBtn');
+  const chatWindow = document.getElementById('chatWindow');
+  const minimizeBtn = document.getElementById('chatMinimizeBtn');
+  const clearBtn = document.getElementById('chatClearBtn');
+  const chatForm = document.getElementById('chatForm');
+  const chatInput = document.getElementById('chatInput');
+  const chatMessages = document.getElementById('chatMessages');
+  const typingIndicator = document.getElementById('chatTypingIndicator');
+  const voiceBtn = document.getElementById('chatVoiceBtn');
+  const chatAboutBtn = document.getElementById('btnChatAboutResult');
+
+  if (!toggleBtn || !chatWindow) return;
+
+  // Load chat history from sessionStorage
+  let chatHistory = [];
+  try {
+    const raw = sessionStorage.getItem('lungcare_chat_history');
+    if (raw) chatHistory = JSON.parse(raw);
+  } catch (e) {
+    chatHistory = [];
+  }
+
+  // Restore past bubbles
+  if (chatHistory.length > 0) {
+    chatMessages.innerHTML = '';
+    chatHistory.forEach(item => {
+      appendChatBubble(item.role, item.content, false);
+    });
+    scrollChatBottom();
+  }
+
+  // Toggle Chat
+  toggleBtn.addEventListener('click', () => {
+    const isOpen = chatWindow.style.display !== 'none';
+    chatWindow.style.display = isOpen ? 'none' : 'flex';
+    if (!isOpen) {
+      scrollChatBottom();
+      setTimeout(() => chatInput && chatInput.focus(), 100);
+    }
+  });
+
+  if (minimizeBtn) {
+    minimizeBtn.addEventListener('click', () => {
+      chatWindow.style.display = 'none';
+    });
+  }
+
+  // Clear Chat
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      chatHistory = [];
+      sessionStorage.removeItem('lungcare_chat_history');
+      chatMessages.innerHTML = `
+        <div class="chat-bubble bot">
+          <div class="bubble-header">LungCare Assistant</div>
+          <div class="bubble-text">
+            Conversation cleared. Ask me anything about your pulmonary health, prevention, nutrition, or screening tests.
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  // Quick reply chips
+  document.querySelectorAll('.chat-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const msg = chip.getAttribute('data-msg');
+      if (msg) {
+        if (chatWindow.style.display === 'none') chatWindow.style.display = 'flex';
+        sendUserMessage(msg);
+      }
+    });
+  });
+
+  // "Chat about my result" button on results page
+  if (chatAboutBtn) {
+    chatAboutBtn.addEventListener('click', () => {
+      chatWindow.style.display = 'flex';
+      scrollChatBottom();
+      const rawRes = sessionStorage.getItem('lungcare_assessment_result');
+      if (rawRes) {
+        const r = JSON.parse(rawRes);
+        const prompt = `Please explain my assessment result (Risk Tier: ${r.risk_level}, Score: ${r.risk_score}/100) and what lifestyle changes I should prioritize.`;
+        sendUserMessage(prompt);
+      } else {
+        sendUserMessage("Explain my assessment result");
+      }
+    });
+  }
+
+  // Form submit
+  if (chatForm) {
+    chatForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = chatInput.value.trim();
+      if (!text) return;
+      chatInput.value = '';
+      sendUserMessage(text);
+    });
+  }
+
+  // Voice Input (Web Speech API)
+  if (voiceBtn) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = currentLang === 'hi' ? 'hi-IN' : 'en-US';
+
+      recognition.onstart = () => {
+        voiceBtn.classList.add('recording');
+        window.showToast('Listening... Speak now.', 'success');
+      };
+
+      recognition.onresult = (evt) => {
+        const transcript = evt.results[0][0].transcript;
+        if (transcript) {
+          chatInput.value = transcript;
+          sendUserMessage(transcript);
+        }
+      };
+
+      recognition.onerror = () => {
+        voiceBtn.classList.remove('recording');
+        window.showToast('Voice recognition error. Try typing.', 'error');
+      };
+
+      recognition.onend = () => {
+        voiceBtn.classList.remove('recording');
+      };
+
+      voiceBtn.addEventListener('click', () => {
+        try {
+          recognition.start();
+        } catch (err) {
+          recognition.stop();
+        }
+      });
+    } else {
+      voiceBtn.title = "Voice recognition not supported in this browser";
+      voiceBtn.style.opacity = "0.5";
+      voiceBtn.addEventListener('click', () => {
+        window.showToast("Speech recognition is not supported in this browser.", "error");
+      });
+    }
+  }
+
+  async function sendUserMessage(text) {
+    // 1. Add user bubble
+    appendChatBubble('user', text, true);
+    scrollChatBottom();
+
+    // 2. Show typing indicator
+    if (typingIndicator) typingIndicator.style.display = 'flex';
+
+    // 3. Retrieve patient context if on or took assessment
+    let patientContext = null;
+    try {
+      const rawCtx = sessionStorage.getItem('lungcare_assessment_result');
+      if (rawCtx) patientContext = JSON.parse(rawCtx);
+    } catch (e) {}
+
+    // 4. Send to backend
+    try {
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          history: chatHistory.slice(-6),
+          patient_context: patientContext
+        })
+      });
+
+      const data = await res.json();
+      if (typingIndicator) typingIndicator.style.display = 'none';
+
+      if (data.success && data.reply) {
+        appendChatBubble('assistant', data.reply, true);
+      } else {
+        appendChatBubble('assistant', data.reply || 'I encountered a brief connection issue. Please feel free to rephrase or ask again.', true);
+      }
+    } catch (err) {
+      if (typingIndicator) typingIndicator.style.display = 'none';
+      appendChatBubble('assistant', 'Sorry, I am unable to connect to the assistant right now. Please check your connection.', true);
+    }
+    scrollChatBottom();
+  }
+
+  function appendChatBubble(role, content, saveToStorage = true) {
+    const bubble = document.createElement('div');
+    bubble.className = `chat-bubble ${role === 'user' ? 'user' : 'bot'}`;
+
+    const header = document.createElement('div');
+    header.className = 'bubble-header';
+    header.textContent = role === 'user' ? 'You' : 'LungCare Assistant';
+
+    const textDiv = document.createElement('div');
+    textDiv.className = 'bubble-text';
+    textDiv.innerHTML = renderSafeMarkdown(content);
+
+    bubble.appendChild(header);
+    bubble.appendChild(textDiv);
+    chatMessages.appendChild(bubble);
+
+    if (saveToStorage) {
+      chatHistory.push({ role, content });
+      if (chatHistory.length > 20) chatHistory.shift();
+      try {
+        sessionStorage.setItem('lungcare_chat_history', JSON.stringify(chatHistory));
+      } catch (e) {}
+    }
+  }
+
+  function scrollChatBottom() {
+    if (chatMessages) {
+      setTimeout(() => {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }, 50);
+    }
+  }
+}
+
+function renderSafeMarkdown(text) {
+  if (!text) return '';
+  // 1. Escape HTML
+  let safe = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  // 2. Bold: **text**
+  safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // 3. Italic: *text*
+  safe = safe.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  // 4. Bullet list items: lines starting with "- " or "* "
+  safe = safe.replace(/^[\s]*[-*]\s+(.*)$/gm, '<li>$1</li>');
+  safe = safe.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+  // 5. Line breaks
+  safe = safe.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>');
+  return safe;
 }

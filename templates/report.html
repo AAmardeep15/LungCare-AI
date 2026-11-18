@@ -13,89 +13,90 @@
     </div>
   </div>
 
-  <!-- The printable container exported to PDF -->
-  <div id="pdfReportContent" style="background:#fff; color:#0f172a; padding:40px; border-radius:16px; border:1px solid #e2e8f0; box-shadow:0 4px 20px rgba(0,0,0,0.06);">
+  <!-- The printable container exported to PDF (Guaranteed High-Contrast Black on White) -->
+  <div id="pdfReportContent" class="pdf-report-canvas" style="background:#ffffff !important; color:#0f172a !important; padding:40px; border-radius:14px; border:1px solid #cbd5e1; box-shadow:0 4px 20px rgba(0,0,0,0.06);">
     
     <!-- Report Header -->
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #0d9488; padding-bottom:20px; margin-bottom:24px;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #0f3d64; padding-bottom:20px; margin-bottom:24px;">
       <div>
-        <div style="display:flex; align-items:center; gap:8px; font-size:1.6rem; font-weight:800; color:#0f172a;">
-          <span style="font-size:1.8rem;">🫁</span> LungCare <span style="color:#0d9488;">AI</span>
+        <div style="display:flex; align-items:center; gap:8px; font-size:1.6rem; font-weight:800; color:#0f172a !important;">
+          <span style="font-size:1.7rem;">🫁</span> LungCare <span style="color:#0284c7 !important;">AI</span>
         </div>
-        <div style="font-size:0.85rem; color:#64748b; margin-top:4px;">Pulmonary Risk Stratification & Screening Platform</div>
+        <div style="font-size:0.88rem; font-weight:600; color:#2d3b4e !important; margin-top:4px;">Lung Cancer Risk Screening & Assessment Report</div>
       </div>
       <div style="text-align:right;">
-        <div style="font-size:1.1rem; font-weight:800; color:#0f172a;" id="repId">#LC-8921</div>
-        <div style="font-size:0.8rem; color:#64748b;" id="repDate">—</div>
+        <div style="font-size:1.15rem; font-weight:800; color:#0f172a !important;" id="repId">#LC-8921</div>
+        <div style="font-size:0.85rem; font-weight:600; color:#2d3b4e !important;" id="repDate">—</div>
       </div>
     </div>
 
     <!-- Educational Disclaimer Alert -->
-    <div style="background:#fff7ed; border-left:4px solid #f97316; border-radius:8px; padding:12px 16px; margin-bottom:24px; font-size:0.85rem; color:#7c2d12; line-height:1.5;">
-      <strong>⚠️ Clinical Notice:</strong> This document is an automated risk assessment report generated for educational and pre-clinical screening purposes. It evaluates multi-factor symptom and lifestyle probabilities using machine learning ensembles. It is not an official oncological diagnosis.
+    <div style="background:#fffbeb !important; border-left:4px solid #b45309; border-radius:8px; padding:12px 16px; margin-bottom:24px; font-size:0.86rem; color:#78350f !important; line-height:1.55;">
+      <strong style="color:#78350f !important;">⚠️ Clinical Screening Notice:</strong> This document is an automated risk assessment report generated for educational and pre-clinical screening purposes. It evaluates multi-factor symptom and lifestyle probabilities using machine learning soft-voting ensembles. It is not an official oncological diagnosis or biopsy report.
     </div>
 
     <!-- Summary Box -->
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:28px;">
-      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px; text-align:center;">
-        <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Risk Classification</div>
-        <div id="repRiskLevel" style="font-size:1.6rem; font-weight:900; margin-top:4px; color:#0d9488;">Low Risk</div>
+      <div style="background:#f8fafc !important; border:1px solid #cbd5e1; border-radius:10px; padding:16px; text-align:center;">
+        <div style="font-size:0.78rem; font-weight:700; color:#2d3b4e !important; text-transform:uppercase; letter-spacing:0.04em;">Risk Classification</div>
+        <div id="repRiskLevel" style="font-size:1.65rem; font-weight:900; margin-top:4px; color:#15803d !important;">Low Risk</div>
       </div>
 
-      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px; text-align:center;">
-        <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Calibrated Score</div>
-        <div id="repRiskScore" style="font-size:1.6rem; font-weight:900; margin-top:4px; color:#0f172a;">-- / 100</div>
+      <div style="background:#f8fafc !important; border:1px solid #cbd5e1; border-radius:10px; padding:16px; text-align:center;">
+        <div style="font-size:0.78rem; font-weight:700; color:#2d3b4e !important; text-transform:uppercase; letter-spacing:0.04em;">Calibrated Score</div>
+        <div id="repRiskScore" style="font-size:1.65rem; font-weight:900; margin-top:4px; color:#0f172a !important;">-- / 100</div>
       </div>
 
-      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px; text-align:center;">
-        <div style="font-size:0.75rem; font-weight:700; color:#64748b; text-transform:uppercase;">Ensemble Confidence</div>
-        <div id="repConfidence" style="font-size:1.6rem; font-weight:900; margin-top:4px; color:#0284c7;">--%</div>
+      <div style="background:#f8fafc !important; border:1px solid #cbd5e1; border-radius:10px; padding:16px; text-align:center;">
+        <div style="font-size:0.78rem; font-weight:700; color:#2d3b4e !important; text-transform:uppercase; letter-spacing:0.04em;">Ensemble Confidence</div>
+        <div id="repConfidence" style="font-size:1.65rem; font-weight:900; margin-top:4px; color:#0284c7 !important;">--%</div>
       </div>
     </div>
 
     <!-- Patient Reported Inputs Table -->
-    <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:12px; color:#0f172a; border-bottom:1px solid #e2e8f0; padding-bottom:6px;">
+    <h3 style="font-size:1.15rem; font-weight:800; margin-bottom:12px; color:#0f172a !important; border-bottom:1px solid #cbd5e1; padding-bottom:6px;">
       Patient Assessment Parameters (23 Features)
     </h3>
     <div style="overflow-x:auto; margin-bottom:28px;">
-      <table style="width:100%; border-collapse:collapse; font-size:0.85rem;" id="repParamsTable">
+      <table style="width:100%; border-collapse:collapse; font-size:0.86rem; background:#ffffff !important;" id="repParamsTable">
         <thead>
-          <tr style="background:#f1f5f9; color:#475569; text-align:left;">
-            <th style="padding:8px 12px; border:1px solid #e2e8f0;">Parameter</th>
-            <th style="padding:8px 12px; border:1px solid #e2e8f0;">Reported Level</th>
-            <th style="padding:8px 12px; border:1px solid #e2e8f0;">Parameter</th>
-            <th style="padding:8px 12px; border:1px solid #e2e8f0;">Reported Level</th>
+          <tr style="background:#f1f5f9 !important; color:#0f172a !important; text-align:left;">
+            <th style="padding:9px 12px; border:1px solid #cbd5e1; color:#0f172a !important; font-weight:700;">Parameter</th>
+            <th style="padding:9px 12px; border:1px solid #cbd5e1; color:#0f172a !important; font-weight:700;">Reported Level</th>
+            <th style="padding:9px 12px; border:1px solid #cbd5e1; color:#0f172a !important; font-weight:700;">Parameter</th>
+            <th style="padding:9px 12px; border:1px solid #cbd5e1; color:#0f172a !important; font-weight:700;">Reported Level</th>
           </tr>
         </thead>
         <tbody id="repParamsBody">
-          <!-- Dynamically populated from session data -->
+          <!-- Dynamically populated from session data with explicit dark font colors -->
         </tbody>
       </table>
     </div>
 
     <!-- Clinical Advisories -->
-    <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:12px; color:#0f172a; border-bottom:1px solid #e2e8f0; padding-bottom:6px;">
+    <h3 style="font-size:1.15rem; font-weight:800; margin-bottom:12px; color:#0f172a !important; border-bottom:1px solid #cbd5e1; padding-bottom:6px;">
       Clinical & Lifestyle Advisory
     </h3>
-    <div id="repAdvisoryBox" style="font-size:0.88rem; color:#334155; line-height:1.6; margin-bottom:24px;">
+    <div id="repAdvisoryBox" style="font-size:0.9rem; color:#1e293b !important; line-height:1.65; margin-bottom:24px;">
       <!-- Populated via JS -->
     </div>
 
     <!-- Physician Guidance -->
-    <div style="background:#f0fdfa; border:1px solid #ccfbf1; border-radius:10px; padding:16px; margin-bottom:30px;">
-      <div style="font-weight:700; color:#0f766e; margin-bottom:6px;">Doctor Consultation Notes</div>
-      <div id="repDoctorNotes" style="font-size:0.85rem; color:#134e4a; line-height:1.6;">—</div>
+    <div style="background:#f0fdf4 !important; border:1px solid #bbf7d0; border-radius:10px; padding:18px; margin-bottom:30px;">
+      <div style="font-weight:700; color:#166534 !important; font-size:0.95rem; margin-bottom:6px;">Physician Consultation & Triage Notes</div>
+      <div id="repDoctorNotes" style="font-size:0.88rem; color:#14532d !important; line-height:1.6;">—</div>
     </div>
 
     <!-- Sign-off footer -->
-    <div style="display:flex; justify-content:space-between; align-items:flex-end; border-top:1px solid #e2e8f0; padding-top:20px; font-size:0.8rem; color:#64748b;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; border-top:1px solid #cbd5e1; padding-top:20px; font-size:0.82rem; color:#2d3b4e !important;">
       <div>
-        <div>LungCare AI Decision Support System</div>
-        <div>Model Architecture: Soft Voting (RF + XGB + LGBM + LR + SVM)</div>
+        <div style="font-weight:700; color:#0f172a !important;">LungCare AI Decision Support System</div>
+        <div>Model Architecture: Soft Voting (Random Forest + XGBoost + LightGBM + Logistic Regression + SVM)</div>
+        <div style="font-size:0.75rem; color:#475569 !important; margin-top:2px;">Local Explainability: SHAP TreeExplainer Attribution</div>
       </div>
       <div style="text-align:right;">
-        <div style="border-bottom:1px dashed #94a3b8; width:160px; height:30px; margin-bottom:4px;"></div>
-        <div>Physician Signature / Verification</div>
+        <div style="border-bottom:1px dashed #475569; width:170px; height:32px; margin-bottom:4px;"></div>
+        <div style="font-weight:600;">Physician Signature / Verification</div>
       </div>
     </div>
 
@@ -118,8 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const repRiskLevelEl = document.getElementById('repRiskLevel');
     if (repRiskLevelEl) {
       repRiskLevelEl.textContent = r.risk_level + ' Risk';
-      const colorMap = { Low: '#10b981', Medium: '#f59e0b', High: '#ef4444' };
-      repRiskLevelEl.style.color = colorMap[r.risk_level] || '#0d9488';
+      const colorMap = { Low: '#15803d', Medium: '#b45309', High: '#b91c1c' };
+      repRiskLevelEl.style.color = (colorMap[r.risk_level] || '#0f3d64') + ' !important';
     }
 
     const repRiskScoreEl = document.getElementById('repRiskScore');
@@ -128,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const repConfidenceEl = document.getElementById('repConfidence');
     if (repConfidenceEl) repConfidenceEl.textContent = r.confidence + '%';
 
-    // Populate parameters table (2 items per row)
+    // Populate parameters table with explicit dark text colors
     const tbody = document.getElementById('repParamsBody');
     if (tbody) {
       const keys = Object.keys(p);
@@ -136,24 +137,24 @@ document.addEventListener('DOMContentLoaded', () => {
       for (let i = 0; i < keys.length; i += 2) {
         const k1 = keys[i];
         const k2 = keys[i + 1];
-        html += `<tr>
-          <td style="padding:6px 12px; border:1px solid #e2e8f0; font-weight:600;">${k1}</td>
-          <td style="padding:6px 12px; border:1px solid #e2e8f0;">${k1 === 'Gender' ? (p[k1] == 1 ? 'Male' : 'Female') : p[k1]}</td>
+        html += `<tr style="background:#ffffff !important;">
+          <td style="padding:7px 12px; border:1px solid #cbd5e1; font-weight:600; color:#0f172a !important; background:#ffffff !important;">${k1}</td>
+          <td style="padding:7px 12px; border:1px solid #cbd5e1; color:#0f172a !important; background:#ffffff !important;">${k1 === 'Gender' ? (p[k1] == 1 ? 'Male' : 'Female') : p[k1]}</td>
           ${k2 ? `
-            <td style="padding:6px 12px; border:1px solid #e2e8f0; font-weight:600;">${k2}</td>
-            <td style="padding:6px 12px; border:1px solid #e2e8f0;">${k2 === 'Gender' ? (p[k2] == 1 ? 'Male' : 'Female') : p[k2]}</td>
-          ` : '<td style="border:1px solid #e2e8f0;"></td><td style="border:1px solid #e2e8f0;"></td>'}
+            <td style="padding:7px 12px; border:1px solid #cbd5e1; font-weight:600; color:#0f172a !important; background:#ffffff !important;">${k2}</td>
+            <td style="padding:7px 12px; border:1px solid #cbd5e1; color:#0f172a !important; background:#ffffff !important;">${k2 === 'Gender' ? (p[k2] == 1 ? 'Male' : 'Female') : p[k2]}</td>
+          ` : '<td style="border:1px solid #cbd5e1; background:#ffffff !important;"></td><td style="border:1px solid #cbd5e1; background:#ffffff !important;"></td>'}
         </tr>`;
       }
       tbody.innerHTML = html;
     }
 
-    // Populate recommendations
+    // Populate recommendations with explicit dark text colors
     const recs = r.recommendations || {};
     const advEl = document.getElementById('repAdvisoryBox');
     if (advEl && recs.clinical) {
-      advEl.innerHTML = `<ul style="padding-left:20px; list-style-type:disc;">` +
-        recs.clinical.map(c => `<li style="margin-bottom:6px;">${c}</li>`).join('') +
+      advEl.innerHTML = `<ul style="padding-left:22px; list-style-type:disc; color:#1e293b !important;">` +
+        recs.clinical.map(c => `<li style="margin-bottom:6px; color:#1e293b !important; font-size:0.9rem;">${c}</li>`).join('') +
         `</ul>`;
     }
 
@@ -163,16 +164,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // PDF Export
+  // High-Contrast PDF Export
   const btnPDF = document.getElementById('btnDownloadPDFFromReport');
   if (btnPDF) {
     btnPDF.addEventListener('click', () => {
       const el = document.getElementById('pdfReportContent');
       const opt = {
-        margin: 10,
-        filename: 'LungCare-AI-Medical-Report.pdf',
+        margin: [10, 10, 10, 10],
+        filename: `LungCare-AI-Medical-Report-${new Date().toISOString().slice(0, 10)}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff',
+          onclone: (clonedDoc) => {
+            clonedDoc.documentElement.setAttribute('data-theme', 'light');
+            const target = clonedDoc.getElementById('pdfReportContent');
+            if (target) {
+              target.style.backgroundColor = '#ffffff';
+              target.style.color = '#0f172a';
+              target.querySelectorAll('*').forEach(node => {
+                if (!node.id.includes('repRiskLevel') && !node.id.includes('repConfidence')) {
+                  node.style.color = '#0f172a';
+                }
+              });
+              target.querySelectorAll('td, th').forEach(cell => {
+                cell.style.color = '#0f172a';
+                cell.style.borderColor = '#cbd5e1';
+              });
+            }
+          }
+        },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
       html2pdf().set(opt).from(el).save();

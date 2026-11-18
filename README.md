@@ -84,7 +84,6 @@ Lung cancer remains the leading cause of cancer-related mortality globally, pred
 - **Personalized Clinical Advisories**: Graded lifestyle, dietary (anti-inflammatory patterns), respiratory rehabilitation exercises, and physician consultation guidance.
 - **Client-Side PDF Synthesis**: Generates publication-ready clinical reports with patient data tables and physician sign-off blocks via `html2pdf.js`.
 - **Private History Tracker**: Tracks historical assessments locally in `localStorage`, rendering longitudinal risk trends with Chart.js.
-- **Bilingual Interface**: Native toggle between **English** and **Hindi** via lightweight JSON localization (`/static/i18n/`).
 - **Dark & Light Mode**: Accessible CSS variable architecture persisted across sessions.
 
 ---
@@ -157,9 +156,6 @@ LungCare-AI/
 │   │   └── style.css          # Semantic CSS variables (Dark/Light mode, Print)
 │   ├── js/
 │   │   └── main.js            # Wizard controller, Chart.js managers, Simulator
-│   ├── i18n/
-│   │   ├── en.json            # English translations
-│   │   └── hi.json            # Hindi translations
 │   └── metrics/               # 9 high-resolution evaluation plots (200 DPI)
 │       ├── confusion_matrix.png
 │       ├── roc_curves.png
@@ -231,6 +227,13 @@ Open your browser and navigate to **`http://localhost:5000`**.
 
 ## 🔌 REST API Endpoints
 
+| Endpoint | Method | Purpose | Authentication | Rate Limit |
+|---|:---:|---|:---:|:---:|
+| `/api/health` | `GET` | System & Model Readiness probe | Public | Unlimited |
+| `/predict` | `POST` | 23-Feature Risk Scoring & SHAP Attribution | Public | Unlimited |
+| `/simulate` | `POST` | Real-Time What-If Parameter Delta Engine | Public | Unlimited |
+| `/chat` | `POST` | AI Assistant (Groq LLM / Keyword Fallback) | Public | 20 req / min |
+
 ### 1. Health Status
 `GET /api/health`
 ```json
@@ -243,24 +246,140 @@ Open your browser and navigate to **`http://localhost:5000`**.
 
 ### 2. Full Risk Prediction & Attribution
 `POST /predict`
-- **Request**: JSON containing all 23 numerical parameters.
-- **Response**: Risk level, calibrated score, confidence, probability breakdown, SHAP drivers, early warnings, and clinical recommendations.
-
-### 3. What-If Simulation
-`POST /simulate`
-- **Request**:
+- **Request Payload**:
 ```json
 {
-  "base_data": { ... },
-  "base_score": 68,
-  "modifications": {
-    "Smoking": 1,
-    "Passive Smoker": 1,
-    "Balanced Diet": 8
+  "Age": 55, "Gender": 1, "Air Pollution": 6, "Alcohol use": 4, "Dust Allergy": 4,
+  "OccuPational Hazards": 5, "Genetic Risk": 5, "chronic Lung Disease": 4,
+  "Balanced Diet": 4, "Obesity": 4, "Smoking": 6, "Passive Smoker": 5, "Chest Pain": 5,
+  "Coughing of Blood": 3, "Fatigue": 5, "Weight Loss": 4, "Shortness of Breath": 5,
+  "Wheezing": 4, "Swallowing Difficulty": 3, "Clubbing of Finger Nails": 3,
+  "Frequent Cold": 4, "Dry Cough": 5, "Snoring": 3
+}
+```
+- **Response**:
+```json
+{
+  "success": true,
+  "result": {
+    "risk_level": "Medium",
+    "risk_score": 61,
+    "confidence": 77.3,
+    "probabilities": { "Low": 15.2, "Medium": 77.3, "High": 7.5 },
+    "top_factors": {
+      "raising": [
+        { "feature": "Smoking", "name": "Active Smoking Habit", "value": 6, "impact": 5.31 }
+      ],
+      "lowering": [
+        { "feature": "Balanced Diet", "name": "Diet Quality (Balanced Diet)", "value": 4, "impact": 3.5 }
+      ]
+    },
+    "early_warnings": [ ... ],
+    "patterns": [ ... ],
+    "recommendations": { ... }
   }
 }
 ```
-- **Response**: Recalculated risk score, new probabilities, and point difference (`risk_delta`).
+
+### 3. What-If Simulation
+`POST /simulate`
+- **Request Payload**:
+```json
+{
+  "base_data": { ... },
+  "base_score": 61,
+  "modifications": {
+    "Smoking": 1,
+    "Passive Smoker": 1,
+    "Balanced Diet": 8,
+    "Alcohol use": 1
+  }
+}
+```
+- **Response Payload**:
+```json
+{
+  "success": true,
+  "new_risk_level": "Medium",
+  "new_risk_score": 53,
+  "new_probabilities": { "Low": 23.5, "Medium": 71.2, "High": 5.3 },
+  "risk_delta": -8,
+  "early_warnings": [ ... ],
+  "patterns": [ ... ]
+}
+```
+
+### 4. LungCare Assistant Chatbot
+`POST /chat`
+- **Request Payload**:
+```json
+{
+  "message": "What is an LDCT scan?",
+  "history": [
+    { "role": "user", "content": "Explain my risk result" },
+    { "role": "assistant", "content": "Your risk tier is Medium..." }
+  ],
+  "patient_context": {
+    "risk_level": "Medium",
+    "risk_score": 61
+  }
+}
+```
+- **Response Payload**:
+```json
+{
+  "success": true,
+  "reply": "A **Low-Dose Computed Tomography (LDCT)** scan is the gold standard clinical screening tool for lung cancer...",
+  "source": "groq_api"
+}
+```
+
+---
+
+## ⚙️ Environment Variables
+
+Configure these settings inside `.env` (copy from `.env.example`):
+
+| Variable | Required | Default Value | Description |
+|---|:---:|---|---|
+| `SECRET_KEY` | Yes | `dev-fallback-key` | Flask session encryption key |
+| `FLASK_DEBUG` | No | `0` | Debug mode (`1` for development, `0` for production) |
+| `GROQ_API_KEY` | Optional | `""` | Free Groq Cloud API key for LLaMA 3.1 chatbot inference |
+| `CHAT_MODEL` | No | `llama-3.1-8b-instant` | Target Groq LLM model identifier |
+
+*Note: If `GROQ_API_KEY` is not provided or network fails, the chatbot seamlessly activates an automated clinical rule-based keyword fallback.*
+
+---
+
+## 🌐 Production Cloud Deployment Guide
+
+### A. Deploy to Render (Web Service)
+1. Fork or push this repository to GitHub.
+2. Sign in to [Render](https://render.com) and create a **New Web Service**.
+3. Select your repository:
+   - **Environment**: `Python 3`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `gunicorn app:app` (or automatically read from `Procfile`)
+4. In **Environment Variables**, add:
+   - `SECRET_KEY` = `<your-random-secret-key>`
+   - `FLASK_DEBUG` = `0`
+   - `GROQ_API_KEY` = `<your-groq-key>` (optional)
+
+### B. Deploy to Hugging Face Spaces (Docker SDK)
+1. Create a **New Space** on [Hugging Face](https://huggingface.co/spaces).
+2. Set Space SDK to **Docker** (Blank).
+3. Push this repository including the provided [`Dockerfile`](file:///c:/Users/KIIT0001/Desktop/lung%20cancer/Dockerfile):
+   - The container automatically installs build dependencies, LightGBM requirements (`libgomp1`), and launches Gunicorn on port `7860` or `PORT`.
+4. In Space **Settings $\rightarrow$ Variables and secrets**, add `GROQ_API_KEY` and `SECRET_KEY`.
+
+---
+
+## 🔮 Future Scope & Enhancements
+
+1. **Multimodal Medical Imaging Integration**: Extend screening by combining symptom tabular models with a Vision Transformer (ViT) or ResNet classifier to ingest raw DICOM / Chest X-Ray images.
+2. **Clinical EHR FHIR API Integration**: Connect with HL7/FHIR hospital standards to auto-populate patient records from Electronic Health Record systems.
+3. **Federated Learning Cohorts**: Train distributed models across multiple hospital nodes without transferring sensitive patient data out of hospital boundaries.
+4. **Speech-to-Text Clinical Scribe**: Expand the assistant with automated audio consultation transcription.
 
 ---
 

@@ -1,186 +1,336 @@
 {% extends "base.html" %}
 
-{% block title %}LungCare AI — Understand Your Health. Make Better Decisions.{% endblock %}
+{% block title %}LungCare AI — Early Lung Cancer Risk Screening & Assessment{% endblock %}
 
 {% block content %}
-<!-- HERO SECTION -->
+<!-- 1. MODERN HERO SECTION -->
 <section class="hero">
   <div class="hero-container">
+    
+    <!-- Hero Left: Medical Proposition & Actions -->
     <div class="hero-left">
-      <div class="hero-tag" data-i18n="hero.tag">
-        <span>✦</span> AI-Powered Pulmonary Risk Screening
+      <div class="hero-clinical-tag">
+        <span class="pulse-indicator"></span>
+        <span>AI-Powered Lung Cancer Screening</span>
       </div>
+
       <h1>
-        <span data-i18n="hero.title_main">Understand Your Health.</span><br>
-        <span class="text-teal" data-i18n="hero.title_sub">Make Better Decisions.</span>
+        Early Lung Cancer <br>
+        <span class="hero-focus">Risk Screening & Assessment</span>
       </h1>
-      <p class="hero-desc" data-i18n="hero.desc">
-        LungCare AI brings multi-factor clinical risk assessment together in one intelligent platform. Analyze your respiratory risk, detect early warning patterns, and receive evidence-grounded wellness advisories.
+
+      <p class="hero-desc">
+        Evaluate 23 lifestyle factors and symptoms in under 2 minutes. Receive instant risk scores, key contributing factors, and evidence-based guidance powered by machine learning.
       </p>
+
       <div class="hero-btns">
-        <a href="{{ url_for('assessment') }}" class="btn-primary" style="padding:14px 28px; font-size:1rem;" data-i18n="hero.cta_start">
-          Start Health Check →
+        <a href="{{ url_for('assessment') }}" class="btn-primary-medical">
+          <span>Start Assessment</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
         </a>
-        <a href="#how-it-works" class="btn-outline" style="padding:14px 24px;" data-i18n="hero.cta_how">
-          How It Works ↓
+        <a href="#how-it-works" class="btn-secondary-medical">
+          <span>How It Works</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 9l-7 7-7-7"/>
+          </svg>
         </a>
+      </div>
+
+      <!-- Institutional Metrics Strip -->
+      <div class="hero-metrics-bar">
+        <div class="hero-metric-item">
+          <div class="hmi-value">23</div>
+          <div class="hmi-label">Risk Factors</div>
+        </div>
+        <div class="hero-metric-divider"></div>
+        <div class="hero-metric-item">
+          <div class="hmi-value">5 Models</div>
+          <div class="hmi-label">Ensemble AI</div>
+        </div>
+        <div class="hero-metric-divider"></div>
+        <div class="hero-metric-item">
+          <div class="hmi-value">100%</div>
+          <div class="hmi-label">CV Accuracy</div>
+        </div>
+        <div class="hero-metric-divider"></div>
+        <div class="hero-metric-item">
+          <div class="hmi-value">SHAP</div>
+          <div class="hmi-label">Explainable AI</div>
+        </div>
       </div>
     </div>
 
-    <!-- Right Side Hero Glass Card Preview -->
+    <!-- Hero Right: Assessment Preview Card -->
     <div class="hero-right">
-      <div class="hero-card">
-        <div class="hero-card-header">
-          <div>
-            <div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Clinical Screening</div>
-            <div style="font-size:1.3rem; font-weight:800; color:var(--text); margin-top:2px;">Pulmonary Status</div>
+      <div class="clinical-terminal-card">
+        
+        <!-- Terminal Header -->
+        <div class="terminal-header">
+          <div class="terminal-title-group">
+            <span class="terminal-dot"></span>
+            <span class="terminal-title">ASSESSMENT PREVIEW</span>
           </div>
-          <span class="badge-ready">AI Online</span>
+          <span class="terminal-status-badge">SAMPLE RESULT</span>
         </div>
 
-        <div style="display:flex; align-items:center; gap:20px; margin:16px 0;">
-          <div style="width:85px; height:85px; border-radius:50%; border:7px solid var(--primary); display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--primary-subtle);">
-            <span style="font-size:1.4rem; font-weight:900; line-height:1; color:var(--primary);">88</span>
-            <span style="font-size:0.65rem; color:var(--text-muted);">/ 100</span>
+        <!-- Demographics Bar -->
+        <div class="terminal-patient-bar">
+          <div><strong>Sample Profile</strong> · 54 yrs, Male</div>
+          <div class="terminal-tag">ID #LC-4091</div>
+        </div>
+
+        <!-- Risk Gauge Readout -->
+        <div class="terminal-risk-section">
+          <div class="risk-gauge-compact">
+            <div class="compact-score-circle">
+              <span class="compact-score">18</span>
+              <span class="compact-denom">/ 100</span>
+            </div>
+            <div class="compact-risk-details">
+              <div class="compact-risk-badge low">Low Risk (Tier 1)</div>
+              <div class="compact-risk-desc">
+                Minimal risk elevation across primary thoracic and environmental indicators.
+              </div>
+            </div>
           </div>
-          <div>
-            <div style="font-size:1.1rem; font-weight:800; color:var(--risk-low);">Optimal Wellness</div>
-            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:3px;">Multi-model consensus confirms low respiratory risk based on lifestyle metrics.</div>
+
+          <!-- Segmented Risk Scale -->
+          <div class="segmented-risk-bar">
+            <div class="seg-segment active-low" title="Low Tier: 0-30">
+              <span>Low (0-30)</span>
+            </div>
+            <div class="seg-segment" title="Moderate Tier: 31-70">
+              <span>Moderate (31-70)</span>
+            </div>
+            <div class="seg-segment" title="High Tier: 71-100">
+              <span>High (71-100)</span>
+            </div>
           </div>
         </div>
 
-        <div class="hero-stats-grid">
-          <div class="hero-stat-box">
-            <div class="hs-label">Ensemble Accuracy</div>
-            <div class="hs-value" style="color:var(--primary);">100%</div>
+        <!-- 4 Key Biomarkers Telemetry Grid -->
+        <div class="terminal-telemetry-grid">
+          <div class="telemetry-box">
+            <div class="tb-label">Air Pollution Exposure</div>
+            <div class="tb-val">Level 3 / 9 <span class="tb-note">(Moderate)</span></div>
           </div>
-          <div class="hero-stat-box">
-            <div class="hs-label">Analyzed Features</div>
-            <div class="hs-value">23 Factors</div>
+          <div class="telemetry-box">
+            <div class="tb-label">Smoking Index</div>
+            <div class="tb-val">Level 2 / 9 <span class="tb-note">(Low)</span></div>
           </div>
-          <div class="hero-stat-box">
-            <div class="hs-label">ML Estimators</div>
-            <div class="hs-value">5 Models</div>
+          <div class="telemetry-box">
+            <div class="tb-label">Blood in Cough</div>
+            <div class="tb-val flag-safe">0 / 9 <span class="tb-note">(None)</span></div>
           </div>
-          <div class="hero-stat-box">
-            <div class="hs-label">Explainability</div>
-            <div class="hs-value" style="color:var(--secondary);">SHAP AI</div>
+          <div class="telemetry-box">
+            <div class="tb-label">Wheezing / Dyspnea</div>
+            <div class="tb-val flag-safe">1 / 9 <span class="tb-note">(Normal)</span></div>
           </div>
         </div>
+
+        <!-- Footnote -->
+        <div class="terminal-footer">
+          <div class="tf-line">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <span>Ensemble Consensus: <strong>5 / 5 Models Aligned</strong> · 99.4% Confidence</span>
+          </div>
+        </div>
+
       </div>
     </div>
+
   </div>
 </section>
 
-<!-- FEATURES GRID -->
+<!-- 2. CORE CAPABILITIES -->
 <section class="section">
   <div class="section-title">
-    <h2 data-i18n="features.title">Clinical-Grade Intelligent Screening</h2>
-    <p>Engineered with modern machine learning ensembles and medical domain guidance to provide transparent pulmonary insights.</p>
+    <div class="section-category">Core Capabilities</div>
+    <h2>Intelligent Lung Health Screening</h2>
+    <p>Powered by a 5-model ensemble and explainable AI for transparent risk evaluation.</p>
   </div>
 
   <div class="features-grid">
+    
+    <!-- Feature 1: Multi-Model Ensemble -->
     <div class="feature-card">
-      <div class="fc-icon">⚡</div>
-      <h3 data-i18n="features.f1_title">Multi-Model Ensemble</h3>
-      <p data-i18n="features.f1_desc">Combines 5 top algorithms (Random Forest, XGBoost, LightGBM, Logistic Regression, SVM) for calibrated risk scoring.</p>
+      <div class="fc-icon-wrapper">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+          <polyline points="2 17 12 22 22 17"/>
+          <polyline points="2 12 12 17 22 12"/>
+        </svg>
+      </div>
+      <h3>Multi-Model Ensemble</h3>
+      <p>Combines 5 algorithms (Random Forest, XGBoost, LightGBM, Logistic Regression, SVM) via soft-voting consensus.</p>
     </div>
 
+    <!-- Feature 2: Early Warning System -->
     <div class="feature-card">
-      <div class="fc-icon">🚨</div>
-      <h3 data-i18n="features.f2_title">Early Warning System</h3>
-      <p data-i18n="features.f2_desc">Proactively identifies high-risk symptom alarms such as hemoptysis, chronic dyspnea, and occupational hazard exposure.</p>
+      <div class="fc-icon-wrapper alert">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+      </div>
+      <h3>Early Warning System</h3>
+      <p>Instantly flags high-risk warning signs such as hemoptysis, chronic cough, and high occupational hazards.</p>
     </div>
 
+    <!-- Feature 3: Explainable AI -->
     <div class="feature-card">
-      <div class="fc-icon">🧬</div>
-      <h3 data-i18n="features.f3_title">Pattern Recognition</h3>
-      <p data-i18n="features.f3_desc">Detects complex clinical synergies such as the smoking-pollution multiplier and classic paraneoplastic triads.</p>
+      <div class="fc-icon-wrapper">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          <line x1="11" y1="8" x2="11" y2="14"/>
+          <line x1="8" y1="11" x2="14" y2="11"/>
+        </svg>
+      </div>
+      <h3>Explainable AI (SHAP)</h3>
+      <p>Calculates Shapley values to show exactly which lifestyle habits and symptoms drive your risk score.</p>
     </div>
 
+    <!-- Feature 4: What-If Simulator -->
     <div class="feature-card">
-      <div class="fc-icon">🔍</div>
-      <h3 data-i18n="features.f4_title">Explainable AI (SHAP)</h3>
-      <p data-i18n="features.f4_desc">Transparent local feature attribution that shows exactly which lifestyle and symptom factors are driving risk.</p>
+      <div class="fc-icon-wrapper">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 12h2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H2"/>
+          <path d="M6 12a6 6 0 0 1 12 0"/>
+          <path d="M22 12h-2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+        </svg>
+      </div>
+      <h3>What-If Simulator</h3>
+      <p>Interact with lifestyle sliders in real time to see how habits like smoking cessation lower your score.</p>
     </div>
+
   </div>
 </section>
 
-<!-- HOW IT WORKS -->
-<section id="how-it-works" class="section" style="background:var(--surface-alt); border-radius:var(--radius-lg); margin-bottom:50px;">
+<!-- 3. HOW IT WORKS WORKFLOW -->
+<section id="how-it-works" class="section protocol-section">
   <div class="section-title">
-    <h2 data-i18n="how.title">How It Works in 3 Simple Steps</h2>
-    <p>From symptom intake to personalized clinical advisory in under 2 minutes.</p>
+    <div class="section-category">Simple Workflow</div>
+    <h2>How It Works</h2>
+    <p>A simple 3-step screening pathway from assessment to personalized guidance.</p>
   </div>
 
-  <div class="steps-grid">
-    <div class="step-card">
-      <div class="step-num" data-i18n="how.step1_num">01</div>
-      <h3 data-i18n="how.step1_title">Guided Health Assessment</h3>
-      <p data-i18n="how.step1_desc">Complete a 3-step structured questionnaire covering personal vitals, lifestyle habits, and respiratory symptoms.</p>
+  <div class="protocol-grid">
+    
+    <!-- Stage 1 -->
+    <div class="protocol-card">
+      <div class="protocol-phase-badge">Step 01</div>
+      <h3>2-Minute Assessment</h3>
+      <p>Complete a quick 3-part questionnaire covering demographics, lifestyle factors, and respiratory symptoms.</p>
     </div>
 
-    <div class="step-card">
-      <div class="step-num" data-i18n="how.step2_num">02</div>
-      <h3 data-i18n="how.step2_title">AI Risk & Pattern Analysis</h3>
-      <p data-i18n="how.step2_desc">Our machine learning ensemble evaluates your 23 health parameters to compute risk tier, confidence, and SHAP drivers.</p>
+    <!-- Stage 2 -->
+    <div class="protocol-card">
+      <div class="protocol-phase-badge">Step 02</div>
+      <h3>Instant AI Analysis</h3>
+      <p>Our 5-model ensemble analyzes your 23 health parameters to compute risk tier, confidence, and SHAP drivers.</p>
     </div>
 
-    <div class="step-card">
-      <div class="step-num" data-i18n="how.step3_num">03</div>
-      <h3 data-i18n="how.step3_title">Clinical Advisory & PDF Report</h3>
-      <p data-i18n="how.step3_desc">Receive tailored lifestyle advice, test what-if health changes interactively, and download your full medical report.</p>
+    <!-- Stage 3 -->
+    <div class="protocol-card">
+      <div class="protocol-phase-badge">Step 03</div>
+      <h3>Insights & Report</h3>
+      <p>Explore actionable guidance, test what-if health changes, and export a clear PDF report for your doctor.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- 4. EMPIRICAL BENCHMARK BANNER -->
+<section class="section" style="padding-top: 0;">
+  <div class="benchmark-proof-card">
+    <div class="bpc-left">
+      <div class="bpc-badge">Academic Validation</div>
+      <h3>Empirically Validated Machine Learning Pipeline</h3>
+      <p>
+        Rigorous 5-fold stratified cross-validation across Random Forest, XGBoost, LightGBM, Logistic Regression, and Support Vector Classifiers.
+      </p>
+      <div class="bpc-stats">
+        <div class="bpc-stat"><strong>1.0000</strong> Macro-F1</div>
+        <div class="bpc-stat"><strong>100%</strong> CV Accuracy</div>
+        <div class="bpc-stat"><strong>0.29 ms</strong> Latency</div>
+      </div>
+    </div>
+    <div class="bpc-right">
+      <a href="{{ url_for('model_performance') }}" class="btn-primary-medical">
+        <span>View Model Report</span>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </a>
     </div>
   </div>
 </section>
 
-<!-- FAQ ACCORDION -->
+<!-- 5. FAQ ACCORDION -->
 <section class="section">
   <div class="section-title">
-    <h2 data-i18n="faq.title">Frequently Asked Questions</h2>
-    <p>Answers to common questions about our risk screening methodologies.</p>
+    <div class="section-category">FAQ</div>
+    <h2>Frequently Asked Questions</h2>
+    <p>Common questions regarding assessment methodology and privacy.</p>
   </div>
 
   <div class="faq-wrap">
+    
     <div class="faq-item">
       <button class="faq-question">
-        <span data-i18n="faq.q1">Is this a medical diagnosis?</span>
-        <span class="faq-icon">+</span>
+        <span>Is this a medical diagnosis?</span>
+        <svg class="faq-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
       </button>
-      <div class="faq-answer" data-i18n="faq.a1">
-        No. LungCare AI is an educational and screening support tool. It estimates statistical risk probability based on reported features but cannot replace diagnostic clinical imaging (e.g., Low-Dose CT) or biopsy by a physician.
+      <div class="faq-answer">
+        No. LungCare AI is an educational screening support tool. It estimates statistical risk probability based on reported features but does not replace clinical evaluation or diagnostic imaging (e.g., Low-Dose CT) by a physician.
       </div>
     </div>
 
     <div class="faq-item">
       <button class="faq-question">
-        <span data-i18n="faq.q2">How is my risk score calculated?</span>
-        <span class="faq-icon">+</span>
+        <span>How is my risk score calculated?</span>
+        <svg class="faq-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
       </button>
-      <div class="faq-answer" data-i18n="faq.a2">
-        The soft-voting ensemble computes calibrated probability distributions across Low, Medium, and High risk tiers: Risk Score = P(Medium)*50 + P(High)*100.
+      <div class="faq-answer">
+        The soft-voting ensemble computes calibrated probability distributions across Low, Medium, and High risk tiers: <code>Risk Score = P(Medium)*50 + P(High)*100</code>.
       </div>
     </div>
 
     <div class="faq-item">
       <button class="faq-question">
-        <span data-i18n="faq.q3">Is my health data private?</span>
-        <span class="faq-icon">+</span>
+        <span>Is my health data private?</span>
+        <svg class="faq-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
       </button>
-      <div class="faq-answer" data-i18n="faq.a3">
-        Yes. Assessment data is processed locally during your session and saved strictly in your browser's private localStorage for your history view.
+      <div class="faq-answer">
+        Yes. Your inputs are evaluated securely in-session and your history is saved strictly within your private browser storage.
       </div>
     </div>
 
     <div class="faq-item">
       <button class="faq-question">
-        <span data-i18n="faq.q4">What should I do if my risk is High?</span>
-        <span class="faq-icon">+</span>
+        <span>What should I do if my risk is High?</span>
+        <svg class="faq-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
       </button>
-      <div class="faq-answer" data-i18n="faq.a4">
-        Seek immediate consultation with a pulmonologist or oncologist. Bring your downloadable PDF report to discuss appropriate screening tests such as a chest LDCT scan.
+      <div class="faq-answer">
+        Schedule a consultation with a pulmonologist or healthcare professional. You can download your assessment PDF to share your findings during your visit.
       </div>
     </div>
+
   </div>
 </section>
 {% endblock %}

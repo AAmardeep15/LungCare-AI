@@ -11,7 +11,7 @@
     text-align: center;
   }
   .mp-hero h1 { font-size: 2.4rem; font-weight: 800; margin: 0 0 .5rem; }
-  .mp-hero p  { color: #94a3b8; font-size: 1.05rem; margin: 0; }
+  .mp-hero p  { color: #e2e8f0; font-weight: 500; font-size: 1.05rem; margin: 0; }
   .mp-container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
   .disclaimer-card {
     background: #fff7ed;
@@ -20,7 +20,8 @@
     padding: 1.1rem 1.4rem;
     margin-bottom: 2rem;
     color: #7c2d12;
-    font-size: .93rem;
+    font-size: .95rem;
+    font-weight: 500;
     line-height: 1.6;
   }
   .metric-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem; margin-bottom: 2.5rem; }
@@ -32,9 +33,9 @@
     padding: 1.4rem 1.2rem;
     text-align: center;
   }
-  .metric-card .mc-label { font-size: .78rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .4rem; }
+  .metric-card .mc-label { font-size: .82rem; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .4rem; }
   .metric-card .mc-value { font-size: 2.1rem; font-weight: 800; color: var(--primary); line-height: 1; }
-  .metric-card .mc-sub   { font-size: .78rem; color: var(--text-muted); margin-top: .3rem; }
+  .metric-card .mc-sub   { font-size: .82rem; font-weight: 600; color: var(--text-muted); margin-top: .3rem; }
   .mp-section { margin-bottom: 2.8rem; }
   .mp-section h2 {
     font-size: 1.3rem; font-weight: 700; color: var(--text);
@@ -58,8 +59,8 @@
     overflow: hidden;
   }
   .plot-card img { width: 100%; height: auto; display: block; border-bottom: 1px solid var(--border-light); }
-  .plot-caption { padding: .75rem 1rem; font-size: .85rem; font-weight: 600; color: var(--text-muted); text-align: center; }
-  .limitations-list { list-style: disc; padding-left: 1.5rem; color: var(--text-muted); font-size: .92rem; line-height: 1.8; }
+  .plot-caption { padding: .75rem 1rem; font-size: .88rem; font-weight: 700; color: var(--text); text-align: center; }
+  .limitations-list { list-style: disc; padding-left: 1.5rem; color: var(--text); font-size: .95rem; font-weight: 500; line-height: 1.8; }
 </style>
 
 <!-- HERO -->
@@ -286,7 +287,7 @@
     </ul>
   </div>
 
-  <p style="color:var(--text-muted);font-size:.8rem;text-align:right">
+  <p style="color:var(--text-muted);font-size:.86rem;font-weight:600;text-align:right">
     Generated at: {{ metrics.generated_at }}
   </p>
 

@@ -6,17 +6,17 @@
 <div class="wizard-container">
   
   <div class="wizard-header">
-    <h1 data-i18n="wizard.title">Pulmonary Health Assessment</h1>
-    <p data-i18n="wizard.subtitle">Complete all 3 sections to receive your calibrated lung cancer risk analysis.</p>
+    <h1>Lung Health Assessment</h1>
+    <p>Complete the 3 quick sections below to receive your calibrated lung cancer risk analysis.</p>
   </div>
 
   <!-- Demo Sample Filler Bar -->
   <div class="sample-bar">
-    <span data-i18n="wizard.fill_sample">Quick Demo Fill:</span>
+    <span>Quick Demo Fill:</span>
     <div class="sample-btns">
-      <button type="button" class="btn-sample low" id="btnFillLow" data-i18n="wizard.low">Low Risk Demo</button>
-      <button type="button" class="btn-sample med" id="btnFillMed" data-i18n="wizard.med">Medium Risk Demo</button>
-      <button type="button" class="btn-sample high" id="btnFillHigh" data-i18n="wizard.high">High Risk Demo</button>
+      <button type="button" class="btn-sample low" id="btnFillLow">Low Risk Demo</button>
+      <button type="button" class="btn-sample med" id="btnFillMed">Medium Risk Demo</button>
+      <button type="button" class="btn-sample high" id="btnFillHigh">High Risk Demo</button>
     </div>
   </div>
 
@@ -27,9 +27,9 @@
 
   <!-- Step Pills -->
   <div class="wizard-steps-nav">
-    <div class="wizard-step-pill active" id="pillStep1" data-i18n="wizard.step1">1. Personal</div>
-    <div class="wizard-step-pill" id="pillStep2" data-i18n="wizard.step2">2. Lifestyle & Environment</div>
-    <div class="wizard-step-pill" id="pillStep3" data-i18n="wizard.step3">3. Symptoms</div>
+    <div class="wizard-step-pill active" id="pillStep1">1. Personal</div>
+    <div class="wizard-step-pill" id="pillStep2">2. Lifestyle & Environment</div>
+    <div class="wizard-step-pill" id="pillStep3">3. Symptoms</div>
   </div>
 
   <!-- Wizard Form -->
@@ -47,7 +47,7 @@
               <span class="label-tooltip" title="Patient age in years (1 to 120)">ℹ️</span>
             </label>
             <input type="number" id="Age" name="Age" class="input-text" min="1" max="120" value="45" required>
-            <small style="color:var(--text-muted); font-size:0.75rem;">Age range: 1 – 120 years</small>
+            <small style="color:var(--text-muted); font-size:0.84rem; font-weight:600;">Age range: 1 – 120 years</small>
           </div>
 
           <div class="form-group">
@@ -59,7 +59,7 @@
               <option value="1">1 — Male</option>
               <option value="2">2 — Female</option>
             </select>
-            <small style="color:var(--text-muted); font-size:0.75rem;">Standard dataset encoding (1 = Male, 2 = Female)</small>
+            <small style="color:var(--text-muted); font-size:0.84rem; font-weight:600;">Standard dataset encoding (1 = Male, 2 = Female)</small>
           </div>
 
         </div>
@@ -356,16 +356,16 @@
 
       <!-- WIZARD BUTTONS -->
       <div class="wizard-footer">
-        <button type="button" id="prevBtn" class="btn-outline" style="visibility:hidden;" data-i18n="wizard.prev">
+        <button type="button" id="prevBtn" class="btn-outline" style="visibility:hidden;">
           ← Previous
         </button>
 
         <div style="display:flex; gap:12px;">
-          <button type="button" id="nextBtn" class="btn-primary" data-i18n="wizard.next">
+          <button type="button" id="nextBtn" class="btn-primary">
             Next Step →
           </button>
-          <button type="submit" id="submitBtn" class="btn-primary" style="display:none;" data-i18n="wizard.submit">
-            Analyze Pulmonary Risk ⚡
+          <button type="submit" id="submitBtn" class="btn-primary" style="display:none;">
+            Analyze Risk ⚡
           </button>
         </div>
       </div>
@@ -376,7 +376,7 @@
   <!-- Loading Animation Modal Overlay -->
   <div id="loadingOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:99999; backdrop-filter:blur(6px); align-items:center; justify-content:center; flex-direction:column; color:#fff;">
     <div style="width:60px; height:60px; border:6px solid rgba(255,255,255,0.2); border-top-color:var(--primary); border-radius:50%; animation:spin 1s linear infinite; margin-bottom:20px;"></div>
-    <div style="font-size:1.3rem; font-weight:800;" data-i18n="wizard.loading">Analyzing with AI Ensemble...</div>
+    <div style="font-size:1.3rem; font-weight:800;">Evaluating Risk with AI Ensemble...</div>
     <div style="font-size:0.85rem; color:#cbd5e1; margin-top:8px;">Running RF + XGBoost + LightGBM + LogisticRegression + SVM + SHAP</div>
   </div>
 

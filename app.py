@@ -2,8 +2,11 @@ import os
 import json
 import logging
 import warnings
+import time
+from collections import defaultdict
 from datetime import datetime
 
+import requests
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from dotenv import load_dotenv
 import joblib
@@ -535,6 +538,190 @@ def simulate():
     except Exception as e:
         logger.warning(f"Simulate error: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
+
+
+# ── Chatbot Service (Groq API + Safe Keyword Fallback) ───────────────────────
+chat_rate_limits = defaultdict(list)
+
+SYSTEM_PROMPT = (
+    "You are LungCare Assistant inside a lung-cancer risk screening web app. "
+    "Explain the user's risk result, risk factors, prevention, diet, exercise, smoking cessation "
+    "and when to see a doctor in simple, kind language. Never diagnose, never prescribe medicines "
+    "or doses. If the user mentions emergency symptoms (coughing blood, severe breathlessness, chest "
+    "pain at rest) tell them to seek medical care immediately. Politely steer unrelated questions "
+    "back to lung health and the app. Keep answers under 150 words. Remind that this is not a medical "
+    "diagnosis when discussing results."
+)
+
+def rule_based_chat_fallback(message, context=None):
+    msg = message.lower()
+    if any(w in msg for w in ["blood", "hemoptysis", "severe breath", "can't breathe", "cannot breathe", "chest pain at rest", "emergency"]):
+        return (
+            "⚠️ **Urgent Medical Notice**: If you are experiencing hemoptysis (coughing blood), "
+            "severe shortness of breath, or persistent resting chest pain, please seek **immediate "
+            "emergency medical attention** or visit your nearest hospital. Do not rely on an online screening tool."
+        )
+    elif any(w in msg for w in ["result", "my risk", "score", "explain", "why"]):
+        if context and context.get("risk_level"):
+            lvl = context.get("risk_level")
+            score = context.get("risk_score", "N/A")
+            conf = context.get("confidence", "N/A")
+            return (
+                f"Your assessment indicates an estimated **{lvl} Risk** tier with a calibrated risk score of **{score}/100** "
+                f"(Model Confidence: **{conf}%**). This score reflects a soft-voting consensus across your reported lifestyle exposures "
+                f"and respiratory indicators. *Please note: This is an educational screening estimate, not a clinical medical diagnosis.*"
+            )
+        return (
+            "Your risk score is calculated via an ensemble of 5 machine learning models (Random Forest, XGBoost, LightGBM, "
+            "Logistic Regression, SVM) using the formula: Risk Score = P(Medium)*50 + P(High)*100. Complete the Health Check wizard "
+            "to receive your personalized pulmonary risk tier."
+        )
+    elif any(w in msg for w in ["smoke", "smoking", "cigarette", "quit", "tobacco", "bidi", "nicotine"]):
+        return (
+            "Active and second-hand tobacco smoke is the leading causal driver of pulmonary malignancy. "
+            "Quitting smoking immediately halts ongoing cellular damage and enables bronchial cilia regeneration. "
+            "Consult a physician or certified cessation counselor about nicotine replacement therapies (patches, gums) "
+            "and behavioral support groups to maximize your success."
+        )
+    elif any(w in msg for w in ["diet", "food", "nutrition", "eat", "vegetable", "fruit"]):
+        return (
+            "A Mediterranean-style eating pattern rich in natural antioxidants supports pulmonary tissue health: "
+            "1. **Cruciferous vegetables** (broccoli, cauliflower) contain sulforaphane. "
+            "2. **Citrus fruits & berries** supply Vitamin C and polyphenols. "
+            "3. **Omega-3s** (walnuts, flaxseed, oily fish) provide anti-inflammatory benefits. "
+            "Avoid ultra-processed foods, processed meats, and excessive alcohol."
+        )
+    elif any(w in msg for w in ["exercise", "breath", "breathing", "walk", "pranayama", "yoga"]):
+        return (
+            "Regular low-to-moderate aerobic exercise—such as 30 minutes of brisk walking 5 days a week—enhances lung vital capacity. "
+            "Pair this with 10 minutes of daily diaphragmatic or pursed-lip breathing (Pranayama) to strengthen your respiratory muscles. "
+            "Avoid exercising outdoors during severe smog or peak pollution days."
+        )
+    elif any(w in msg for w in ["ldct", "scan", "ct scan", "screening", "x-ray", "test"]):
+        return (
+            "A **Low-Dose Computed Tomography (LDCT)** scan is the gold standard clinical screening tool for lung cancer. "
+            "It uses approximately 75% less radiation than standard diagnostic CT scans and can detect small, asymptomatic pulmonary "
+            "nodules years before clinical symptoms manifest. Talk to a pulmonologist to determine if your age and smoking history qualify you for LDCT."
+        )
+    elif any(w in msg for w in ["doctor", "when to see", "specialist", "appointment", "pulmonologist"]):
+        return (
+            "You should consult a pulmonologist or general physician if you have a persistent cough lasting >3 weeks, "
+            "progressive shortness of breath, recurrent chest infections, or if your screening score places you in a Medium or High risk tier. "
+            "Bring your downloadable PDF report to your appointment for discussion."
+        )
+    else:
+        return (
+            "Hello! I am your **LungCare Assistant**. I can help you understand your screening results, discuss preventive "
+            "lifestyle habits (smoking cessation, pulmonary exercises, antioxidant nutrition), explain clinical tests like LDCT scans, "
+            "or guide you on when to consult a specialist. How can I support your lung health today?"
+        )
+
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    try:
+        ip = request.remote_addr or "127.0.0.1"
+        now = time.time()
+        chat_rate_limits[ip] = [t for t in chat_rate_limits[ip] if now - t < 60]
+        if len(chat_rate_limits[ip]) >= 20:
+            return jsonify({
+                "success": False,
+                "reply": "You have reached the maximum rate of 20 requests per minute. Please wait a moment before sending another message."
+            }), 429
+
+        payload = request.get_json() or {}
+        raw_msg = str(payload.get("message", "")).strip()
+        if not raw_msg:
+            return jsonify({"success": False, "error": "Message cannot be empty."}), 400
+
+        user_message = raw_msg[:800]
+        history = payload.get("history", [])
+        patient_context = payload.get("patient_context", None)
+
+        context_str = ""
+        if patient_context and isinstance(patient_context, dict):
+            context_str = (
+                f"\n\n[Current User Assessment Result Context]:\n"
+                f"- Risk Level: {patient_context.get('risk_level', 'N/A')}\n"
+                f"- Calibrated Risk Score: {patient_context.get('risk_score', 'N/A')}/100\n"
+                f"- Model Confidence: {patient_context.get('confidence', 'N/A')}%\n"
+                f"- Key Impact Factors: {patient_context.get('top_factors', {})}\n"
+                f"- Early Warning Alarms: {patient_context.get('early_warnings', [])}"
+            )[:1200]
+
+        groq_api_key = os.environ.get("GROQ_API_KEY", "").strip()
+        chat_model = os.environ.get("CHAT_MODEL", "qwen/qwen3.8-27b").strip()
+
+        # If key is absent, use rule-based fallback immediately
+        if not groq_api_key:
+            reply = rule_based_chat_fallback(user_message, patient_context)
+            chat_rate_limits[ip].append(now)
+            return jsonify({"success": True, "reply": reply, "source": "rule_based_fallback"})
+
+        # Build message history for Groq (keep last 6 turns)
+        groq_messages = [
+            {"role": "system", "content": SYSTEM_PROMPT + context_str}
+        ]
+        for turn in history[-6:]:
+            role = turn.get("role", "user")
+            if role in ["user", "assistant"]:
+                groq_messages.append({"role": role, "content": str(turn.get("content", ""))[:800]})
+
+        groq_messages.append({"role": "user", "content": user_message})
+
+        try:
+            resp = requests.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {groq_api_key}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "model": chat_model,
+                    "messages": groq_messages,
+                    "temperature": 0.4,
+                    "max_tokens": 350
+                },
+                timeout=20
+            )
+
+            # Auto-fallback to alternative model if current model returns 404/not found
+            if resp.status_code == 404 and chat_model != "qwen/qwen3.8-27b":
+                logger.info(f"Model {chat_model} not found on Groq, retrying with qwen/qwen3.8-27b")
+                resp = requests.post(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {groq_api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "model": "qwen/qwen3.8-27b",
+                        "messages": groq_messages,
+                        "temperature": 0.4,
+                        "max_tokens": 350
+                    },
+                    timeout=20
+                )
+
+            if resp.status_code == 200:
+                res_data = resp.json()
+                reply = res_data["choices"][0]["message"]["content"].strip()
+                chat_rate_limits[ip].append(now)
+                return jsonify({"success": True, "reply": reply, "source": "groq_api"})
+            else:
+                logger.warning(f"Groq API returned HTTP {resp.status_code}: {resp.text[:200]}")
+                reply = rule_based_chat_fallback(user_message, patient_context)
+                chat_rate_limits[ip].append(now)
+                return jsonify({"success": True, "reply": reply, "source": "rule_based_fallback"})
+        except Exception as e:
+            logger.warning(f"Groq request exception: {e}")
+            reply = rule_based_chat_fallback(user_message, patient_context)
+            chat_rate_limits[ip].append(now)
+            return jsonify({"success": True, "reply": reply, "source": "rule_based_fallback"})
+
+    except Exception as ge:
+        logger.warning(f"Chat endpoint error: {ge}")
+        return jsonify({"success": False, "reply": "An unexpected error occurred. Please try again."}), 500
 
 
 @app.route("/api/health")

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Assessment Results & Clinical Advisory — LungCare AI{% endblock %}
+{% block title %}Assessment Results & Advisory — LungCare AI{% endblock %}
 
 {% block content %}
 <div class="results-page" id="printableReport">
@@ -8,7 +8,7 @@
   <!-- Header with timestamp and Report ID -->
   <div class="results-header">
     <div>
-      <h1 data-i18n="results.title">Assessment Results</h1>
+      <h1>Assessment Results</h1>
       <div class="results-meta">
         Report Generated: <span id="reportTimestamp">—</span> | Patient ID: <span id="reportId" style="font-weight:700;">#LC-{{ range(1000, 9999) | random }}</span>
       </div>
@@ -16,8 +16,8 @@
 
     <!-- Quick action links -->
     <div style="display:flex; gap:10px;">
-      <button class="btn-outline" id="btnSaveHistory" data-i18n="results.btn_history">💾 Save to History</button>
-      <button class="btn-primary" id="btnExportPDF" data-i18n="results.btn_pdf">📄 Download PDF</button>
+      <button class="btn-outline" id="btnSaveHistory">💾 Save to History</button>
+      <button class="btn-primary" id="btnExportPDF">📄 Download PDF</button>
     </div>
   </div>
 
@@ -31,7 +31,7 @@
     
     <!-- 1. Semicircle Risk Gauge Card -->
     <div class="gauge-card">
-      <div style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:6px;" data-i18n="results.gauge_title">
+      <div style="font-size:0.84rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--text); margin-bottom:6px;">
         Calibrated Risk Score
       </div>
 
@@ -46,14 +46,14 @@
       <div id="riskLevelBadge" class="gauge-level-badge" style="background:var(--surface-alt); color:var(--text);">
         Analyzing...
       </div>
-      <div style="font-size:0.8rem; color:var(--text-muted); margin-top:8px;">
-        <span data-i18n="results.confidence">Model Confidence</span>: <strong id="confidenceVal">--%</strong>
+      <div style="font-size:0.86rem; font-weight:600; color:var(--text); margin-top:8px;">
+        <span>Model Confidence</span>: <strong id="confidenceVal">--%</strong>
       </div>
     </div>
 
     <!-- 2. Probability Donut Chart Card -->
     <div class="chart-card">
-      <div style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); margin-bottom:12px;" data-i18n="results.prob_title">
+      <div style="font-size:0.84rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--text); margin-bottom:12px;">
         Risk Probability Breakdown
       </div>
       <div style="width:200px; height:200px; position:relative;">
@@ -73,7 +73,7 @@
     
     <!-- Radar Chart: Factor Profiles -->
     <div class="chart-card" style="align-items:stretch;">
-      <div style="font-size:0.85rem; font-weight:700; color:var(--text); margin-bottom:12px;" data-i18n="results.radar_title">
+      <div style="font-size:0.85rem; font-weight:700; color:var(--text); margin-bottom:12px;">
         Multi-Factor Risk Radar
       </div>
       <div style="height:280px; position:relative;">
@@ -84,12 +84,12 @@
     <!-- SHAP Horizontal Bar Chart: Why this result? -->
     <div class="chart-card" style="align-items:stretch;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-        <div style="font-size:0.85rem; font-weight:700; color:var(--text);" data-i18n="results.shap_title">
+        <div style="font-size:0.85rem; font-weight:700; color:var(--text);">
           Why This Result? (SHAP Explainability)
         </div>
-        <span style="font-size:0.7rem; background:var(--surface-alt); padding:3px 8px; border-radius:var(--radius-pill); color:var(--text-muted);">AI Attribution</span>
+        <span style="font-size:0.75rem; font-weight:700; background:var(--surface-alt); padding:3px 8px; border-radius:var(--radius-pill); color:var(--text);">AI Attribution</span>
       </div>
-      <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:12px;" data-i18n="results.shap_sub">
+      <div style="font-size:0.84rem; font-weight:500; color:var(--text-muted); margin-bottom:12px;">
         Features having the strongest positive and negative impact on risk level
       </div>
       <div style="height:250px; position:relative;">
@@ -103,31 +103,31 @@
   <div class="alarms-grid">
     <!-- Early Warnings -->
     <div class="alarm-card">
-      <h3 style="color:var(--risk-high);"><span data-i18n="results.early_warnings">Early Warning Indicators</span> 🚨</h3>
+      <h3 style="color:var(--risk-high);"><span>Early Warning Indicators</span> 🚨</h3>
       <div id="earlyWarningsContainer">
-        <p style="color:var(--text-muted); font-size:0.88rem;">No critical emergency indicators flagged.</p>
+        <p style="color:var(--text); font-size:0.9rem; font-weight:500;">No critical emergency indicators flagged.</p>
       </div>
     </div>
 
     <!-- Pattern Synergies -->
     <div class="alarm-card">
-      <h3 style="color:var(--secondary);"><span data-i18n="results.patterns">Pattern Recognition Analysis</span> 🧬</h3>
+      <h3 style="color:var(--secondary);"><span>Pattern Recognition Analysis</span> 🧬</h3>
       <div id="patternsContainer">
-        <p style="color:var(--text-muted); font-size:0.88rem;">No complex multi-factor risk synergies detected.</p>
+        <p style="color:var(--text); font-size:0.9rem; font-weight:500;">No complex multi-factor risk synergies detected.</p>
       </div>
     </div>
   </div>
 
   <!-- RECOMMENDATIONS TABS -->
   <div class="tabs-wrap">
-    <h3 style="font-size:1.25rem; font-weight:800; margin-bottom:16px;" data-i18n="results.recs_title">Personalized Recommendations</h3>
+    <h3 style="font-size:1.25rem; font-weight:800; margin-bottom:16px;">Personalized Recommendations</h3>
     
     <div class="tab-nav">
-      <button class="tab-btn active" data-tab="tabClinical" data-i18n="results.tab_clinical">Clinical & Tests</button>
-      <button class="tab-btn" data-tab="tabAvoid" data-i18n="results.tab_avoid">Factors to Avoid</button>
-      <button class="tab-btn" data-tab="tabExercise" data-i18n="results.tab_exercise">Breathing & Activity</button>
-      <button class="tab-btn" data-tab="tabFood" data-i18n="results.tab_food">Nutrition & Diet</button>
-      <button class="tab-btn" data-tab="tabDoctor" data-i18n="results.tab_doctor">Doctor Consultation</button>
+      <button class="tab-btn active" data-tab="tabClinical">Clinical & Tests</button>
+      <button class="tab-btn" data-tab="tabAvoid">Factors to Avoid</button>
+      <button class="tab-btn" data-tab="tabExercise">Breathing & Activity</button>
+      <button class="tab-btn" data-tab="tabFood">Nutrition & Diet</button>
+      <button class="tab-btn" data-tab="tabDoctor">Doctor Consultation</button>
     </div>
 
     <div class="tab-content">
@@ -150,7 +150,7 @@
 
     <!-- Recommended Next Steps Timeline -->
     <div style="margin-top:28px; border-top:1px solid var(--border); padding-top:20px;">
-      <h4 style="font-size:1rem; font-weight:700; margin-bottom:12px;" data-i18n="results.timeline_title">Recommended Next Steps</h4>
+      <h4 style="font-size:1rem; font-weight:700; margin-bottom:12px;">Recommended Next Steps</h4>
       <div class="timeline-wrap" id="nextStepsTimeline"></div>
     </div>
   </div>
@@ -159,8 +159,8 @@
   <div class="simulator-card">
     <div class="sim-header">
       <div>
-        <h3 style="font-size:1.3rem; font-weight:800; margin-bottom:4px;" data-i18n="results.whatif_title">Interactive What-If Simulator</h3>
-        <p style="font-size:0.85rem; color:var(--text-muted); margin:0;" data-i18n="results.whatif_sub">
+        <h3 style="font-size:1.3rem; font-weight:800; margin-bottom:4px;">Interactive What-If Simulator</h3>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin:0;">
           Adjust your lifestyle parameters below to see how changes directly impact your risk score in real time.
         </p>
       </div>
@@ -225,10 +225,13 @@
 
   <!-- ACTION BUTTONS BAR -->
   <div class="results-actions-bar">
-    <a href="https://www.google.com/maps/search/pulmonologist+near+me" target="_blank" rel="noopener noreferrer" class="btn-primary" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%);" data-i18n="results.btn_doctor">
+    <button type="button" id="btnChatAboutResult" class="btn-primary" style="background:linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);">
+      💬 Chat About My Result
+    </button>
+    <a href="https://www.google.com/maps/search/pulmonologist+near+me" target="_blank" rel="noopener noreferrer" class="btn-primary" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%);">
       Find Nearby Pulmonologist 📍
     </a>
-    <a href="{{ url_for('assessment') }}" class="btn-outline" data-i18n="results.btn_retake">
+    <a href="{{ url_for('assessment') }}" class="btn-outline">
       Retake Assessment 🔄
     </a>
     <a href="{{ url_for('report') }}" class="btn-outline">
